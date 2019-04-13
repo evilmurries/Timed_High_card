@@ -36,7 +36,6 @@ class Model
       this.gameController = gameController;
       
    }
-
 }
 
 /*
@@ -130,9 +129,7 @@ class View
    {
       return this.myCardTable;
    }
-   
 }
-
 
 
 /*
@@ -177,14 +174,20 @@ class Controller
       this.gameModel = new Model(this);
       this.gameView = new View(this);
       
-      // add human labels
+      // add mouse listener
       for (int k = 0; k < Controller.NUM_CARDS_PER_HAND; k++)
       {
          gameView.getTable().pn1HumanHand.add(View.humanLabels[k]);
          HandCardMouseListener listener = new HandCardMouseListener(k, 
-            highCardGame);
+            this.highCardGame);
          View.humanLabels[k].addMouseListener(listener);
       }
+      
+      // add button listener
+      this.gameView.getTable().getExitButton().addActionListener(
+         new GameButtonListener());
+      this.gameView.getTable().getnewGameButton().addActionListener(
+         new GameButtonListener());
       
    }
    
@@ -245,6 +248,36 @@ class Controller
       public void actionPerformed(ActionEvent e)
       {
          View.playedCardLabels[0].setIcon(GUICard.getIcon(computerCard));
+      }
+   }
+   
+   class GameButtonListener implements ActionListener
+   {
+      /*
+       * This method is the ActionListener for class CardTable. It contains 
+       * the logic for when the exitButton and newGameButton are pressed.
+       */
+      public void actionPerformed(ActionEvent e)
+      {
+         String buttonString = e.getActionCommand();
+
+         if (buttonString.equals("Exit Game"))
+         {
+            System.out.println("Ending Game.");
+            System.exit(0);
+         } else if (buttonString.equals("Start New Game"))
+         {
+            System.out.println("New Game Started.");
+            for (int i = 0; i < Controller.totalScores.length; i++)
+               Controller.totalScores[i] = 0;
+            for (int i = 0; i < Controller.playerScores.length; i++)
+               Controller.playerScores[i] = 0;
+            Controller.lastPlayedCard = null;
+            Controller.compWinner = false;
+            Controller.playerWinner = false;
+            //Controller.main(newGame);
+         } else
+            System.out.println("Unexpected Button Error.");
       }
    }
 
@@ -536,7 +569,7 @@ class Controller
  * game of playing cards complete with multiple hands 
  * and main playing area.
  */
-class CardTable extends JFrame implements ActionListener
+class CardTable extends JFrame
 {
 
    static final int MAX_CARDS_PER_HAND = 57;
@@ -578,10 +611,6 @@ class CardTable extends JFrame implements ActionListener
       this.buttonPanel.add(this.newGameButton, BorderLayout.EAST);
       this.add(buttonPanel);
 
-      // add action listeners
-      this.exitButton.addActionListener(this);
-      this.newGameButton.addActionListener(this);
-
       // layout computer player hands
       pn1ComputerHand = new JPanel();
       pn1ComputerHand.setLayout(new GridLayout(1, numCardsPerHand));
@@ -608,32 +637,21 @@ class CardTable extends JFrame implements ActionListener
       this.add(this.mainPanel, BorderLayout.CENTER);
 
    }
-
+   
    /*
-    * This method is the ActionListener for class CardTable. It contains 
-    * the logic for when the exitButton and newGameButton are pressed.
+    * This method returns the Exit Button for the CardTable.
     */
-   public void actionPerformed(ActionEvent e)
+   public JButton getExitButton()
    {
-      String buttonString = e.getActionCommand();
-
-      if (buttonString.equals("Exit Game"))
-      {
-         System.out.println("Ending Game.");
-         System.exit(0);
-      } else if (buttonString.equals("Start New Game"))
-      {
-         System.out.println("New Game Started.");
-         for (int i = 0; i < Controller.totalScores.length; i++)
-            Controller.totalScores[i] = 0;
-         for (int i = 0; i < Controller.playerScores.length; i++)
-            Controller.playerScores[i] = 0;
-         Controller.lastPlayedCard = null;
-         Controller.compWinner = false;
-         Controller.playerWinner = false;
-         //Controller.main(newGame);
-      } else
-         System.out.println("Unexpected Button Error.");
+      return this.exitButton;
+   }
+   
+   /*
+    * This method returns the New Game Button for the CardTable.
+    */
+   public JButton getnewGameButton()
+   {
+      return this.newGameButton;
    }
 
    /*
