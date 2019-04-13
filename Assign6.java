@@ -254,7 +254,7 @@ class Controller
       {
          gameView.pn1HumanHand.add(CardTableView.humanLabels[k]);
          HandCardMouseListener listener = new HandCardMouseListener(k, 
-            this.highCardGame);
+            this.highCardGame, this);
          CardTableView.humanLabels[k].addMouseListener(listener);
       }
       
@@ -283,6 +283,25 @@ class Controller
       Deck deck = new Deck();
       deck.shuffle();
       return deck.dealCard();
+   }
+   
+   /* redraw human hand every time 2 cards played to show how many cards 
+    * left in a hand, or after a round ended to show again
+    * full hand of cards
+    */
+   public void redrawPlayerHand()
+   {
+      Hand hand = highCardGame.getHand(1);
+      for (int k = 0; k < NUM_CARDS_PER_HAND; k++)
+      {
+         if (k >= hand.getNumCards())
+         {
+            CardTableView.humanLabels[k].setIcon(GUICard.getBackCardIcon());
+         } else
+         {
+            CardTableView.humanLabels[k].setIcon(GUICard.getIcon(hand.inspectCard(k)));
+         }
+      }
    }
    
    /*
@@ -351,16 +370,31 @@ class Controller
             System.exit(0);
          } else if (buttonString.equals("Start New Game"))
          {
+            int i;
             System.out.println("New Game Started.");
-            for (int i = 0; i < Controller.totalScores.length; i++)
+            for (i = 0; i < Controller.totalScores.length; i++)
                Controller.totalScores[i] = 0;
-            for (int i = 0; i < Controller.playerScores.length; i++)
+            for (i = 0; i < Controller.playerScores.length; i++)
                Controller.playerScores[i] = 0;
+            for (i = 0; i < NUM_PLAYERS; i++)
+            {
+               CardTableView.playerScoresLabels[i].setText(
+                  Integer.toString(playerScores[i]));
+            }
+            for (i = 0; i < NUM_CARDS_PER_HAND; i++)
+            {
+               CardTableView.humanLabels[i].setIcon(GUICard.getBackCardIcon());
+            }
+            for (i = 0; i < NUM_PLAYERS; i++)
+               CardTableView.playedCardLabels[i].setIcon(GUICard.getBackCardIcon());
+            
             Controller.lastPlayedCard = null;
             Controller.compWinner = false;
             Controller.playerWinner = false;
-            String[] newGame = {"New Game"};
-            Assign6.main(newGame);
+            highCardGame.newGame();
+            highCardGame.deal();
+            HandCardMouseListener.resetScores();
+            redrawPlayerHand();
 
          } else
             System.out.println("Unexpected Button Error.");
@@ -376,14 +410,16 @@ class Controller
 
       private final int cardIndex;
       private final CardGameFramework game;
+      private Controller gameController;
 
       /*
        * Constructor method for class HandCardMouseListener
        */
-      public HandCardMouseListener(int cardIndex, CardGameFramework game)
+      public HandCardMouseListener(int cardIndex, CardGameFramework game, Controller gameController)
       {
          this.cardIndex = cardIndex;
          this.game = game;
+         this.gameController = gameController;
       }
 
       /*
@@ -426,7 +462,7 @@ class Controller
             compWinner = false;
          }
 
-         redrawPlayerHand();
+         this.gameController.redrawPlayerHand();
          redrawScore();
 
          Timer timer = new Timer(2000, new DelayedGameCheckListener(this));
@@ -520,7 +556,7 @@ class Controller
 
             game.deal();
             resetScores();
-            redrawPlayerHand();
+            this.gameController.redrawPlayerHand();
          }
       }
 
@@ -557,24 +593,6 @@ class Controller
             compWinner = false;
          }
       }
-      /* redraw human hand every time 2 cards played to show how many cards 
-       * left in a hand, or after a round ended to show again
-       * full hand of cards
-       */
-      public void redrawPlayerHand()
-      {
-         Hand hand = game.getHand(1);
-         for (int k = 0; k < NUM_CARDS_PER_HAND; k++)
-         {
-            if (k >= hand.getNumCards())
-            {
-               CardTableView.humanLabels[k].setIcon(GUICard.getBackCardIcon());
-            } else
-            {
-               CardTableView.humanLabels[k].setIcon(GUICard.getIcon(hand.inspectCard(k)));
-            }
-         }
-      }
 
       /* 
        * show the new score after every 2 cards play 
@@ -592,7 +610,7 @@ class Controller
        * refresh score after each round to start count against to see 
        * who will win 
        */
-      public void resetScores()
+      public static void resetScores()
       {
          for (int i = 0; i < NUM_PLAYERS; i++)
          {
