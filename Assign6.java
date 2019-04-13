@@ -260,9 +260,9 @@ class Controller
       
       // add button listener
       this.gameView.getExitButton().addActionListener(
-         new GameButtonListener());
+         new GameButtonListener(this));
       this.gameView.getnewGameButton().addActionListener(
-         new GameButtonListener());
+         new GameButtonListener(this));
       
    }
    
@@ -328,6 +328,15 @@ class Controller
    
    class GameButtonListener implements ActionListener
    {
+      
+      Controller gameController;
+      
+      public GameButtonListener(Controller gameController)
+      {
+         super();
+         this.gameController = gameController;
+      }
+      
       /*
        * This method is the ActionListener for class CardTable. It contains 
        * the logic for when the exitButton and newGameButton are pressed.
@@ -350,6 +359,9 @@ class Controller
             Controller.lastPlayedCard = null;
             Controller.compWinner = false;
             Controller.playerWinner = false;
+            String[] newGame = {"New Game"};
+            Assign6.main(newGame);
+
          } else
             System.out.println("Unexpected Button Error.");
       }
