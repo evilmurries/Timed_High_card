@@ -14,11 +14,14 @@ import javax.swing.*;
 
 public class Assign6
 {
-
+   public static void main(String[] args)
+   {
+      Controller gameController = new Controller();
+   }
 }
 
 /*
- * One object of class model containsthe logic for the card game.
+ * One object of class model contains the logic for the card game.
  */
 class Model
 {
@@ -50,6 +53,7 @@ class View
    static JLabel[] playerScoresLabels = new JLabel[Controller.NUM_PLAYERS];
    
    Controller gameController;
+   CardTable myCardTable;
    
    public View(Controller gameController)
    {
@@ -59,7 +63,7 @@ class View
       this.gameController = gameController;
       
       // establish main frame in which program will run
-      CardTable myCardTable = new CardTable("CardTable", 
+      this.myCardTable = new CardTable("CardTable", 
          Controller.NUM_CARDS_PER_HAND, Controller.NUM_PLAYERS);
       myCardTable.setSize(800, 625);
       myCardTable.setLocationRelativeTo(null);
@@ -119,7 +123,17 @@ class View
       
    }
    
+   /*
+    * This method returns the CardTable object stored in the View.
+    */
+   public CardTable getTable()
+   {
+      return this.myCardTable;
+   }
+   
 }
+
+
 
 /*
  * One object of class Controller controls the GUI and Model for the game.
@@ -155,18 +169,18 @@ class Controller
       this.numUnusedCardsPerPack = 0;
       this.unusedCardsPerPack = null;
       
-      this.gameModel = new Model(this);
-      this.gameView = new View(this);
-      
       this.highCardGame = new CardGameFramework(numPacksPerDeck, 
             numJokersPerPack, numUnusedCardsPerPack,unusedCardsPerPack, 
             NUM_PLAYERS, NUM_CARDS_PER_HAND);
-      highCardGame.deal();
+      this.highCardGame.deal();
+      
+      this.gameModel = new Model(this);
+      this.gameView = new View(this);
       
       // add human labels
       for (int k = 0; k < Controller.NUM_CARDS_PER_HAND; k++)
       {
-         gameView.pn1HumanHand.add(View.humanLabels[k]);
+         gameView.getTable().pn1HumanHand.add(View.humanLabels[k]);
          HandCardMouseListener listener = new HandCardMouseListener(k, 
             highCardGame);
          View.humanLabels[k].addMouseListener(listener);
