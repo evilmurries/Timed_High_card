@@ -42,7 +42,7 @@ class Model
  * One object of class View contains the graphical user interface for 
  * the card game.
  */
-class View
+class CardTableView extends JFrame
 {
    
    static JLabel[] computerLabels = new JLabel[Controller.NUM_CARDS_PER_HAND];
@@ -51,22 +51,71 @@ class View
    static JLabel[] playLabelText = new JLabel[Controller.NUM_PLAYERS];
    static JLabel[] playerScoresLabels = new JLabel[Controller.NUM_PLAYERS];
    
-   Controller gameController;
-   CardTable myCardTable;
+   private int numCardsPerHand;
+   private int numPlayers;
    
-   public View(Controller gameController)
+   public JPanel pn1ComputerHand, pn1HumanHand, pn1PlayerArea, 
+   buttonPanel, mainPanel;
+
+   public JButton exitButton, newGameButton;
+   
+   Controller gameController;
+   
+   public CardTableView(Controller gameController, String title, int numCardsPerHand, int numPlayers)
    {
+      
+      super(title);
+      
+      // test parameters validity
+      if (numCardsPerHand < 0 || numCardsPerHand > Controller.MAX_CARDS_PER_HAND 
+         || numPlayers < 0 || numPlayers > Controller.MAX_PLAYERS)
+      {
+         return;
+      }
+      
+      // define main frame attributes
+      this.gameController = gameController;
+      this.numCardsPerHand = numCardsPerHand;
+      this.numPlayers = numPlayers;
+      this.setSize(800, 625);
+      this.setLocationRelativeTo(null);
+      this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       
       int k;
       
-      this.gameController = gameController;
+      // create button panel
+      this.buttonPanel = new JPanel();
+      this.buttonPanel.setLayout(new BorderLayout());
+      this.exitButton = new JButton("Exit Game");
+      this.newGameButton = new JButton("Start New Game");
+      this.buttonPanel.add(this.exitButton, BorderLayout.WEST);
+      this.buttonPanel.add(this.newGameButton, BorderLayout.EAST);
+      this.add(buttonPanel);
       
-      // establish main frame in which program will run
-      this.myCardTable = new CardTable("CardTable", 
-         Controller.NUM_CARDS_PER_HAND, Controller.NUM_PLAYERS);
-      myCardTable.setSize(800, 625);
-      myCardTable.setLocationRelativeTo(null);
-      myCardTable.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      // layout computer player hands
+      pn1ComputerHand = new JPanel();
+      pn1ComputerHand.setLayout(new GridLayout(1, numCardsPerHand));
+      pn1ComputerHand.setBorder(new TitledBorder("Computer Hand"));
+
+      // layout center playing area
+      pn1PlayerArea = new JPanel();
+      pn1PlayerArea.setLayout(new GridLayout(3, numPlayers));
+      pn1PlayerArea.setBorder(new TitledBorder("Playing Area"));
+
+      // layout human player hands
+      pn1HumanHand = new JPanel();
+      pn1HumanHand.setLayout(new GridLayout(1, numCardsPerHand));
+      pn1HumanHand.setBorder(new TitledBorder("Your Hand"));
+      
+      this.mainPanel = new JPanel();
+      this.mainPanel.setLayout(new BorderLayout());
+      this.mainPanel.add(pn1ComputerHand, BorderLayout.NORTH);
+      this.mainPanel.add(pn1PlayerArea, BorderLayout.CENTER);
+      this.mainPanel.add(pn1HumanHand, BorderLayout.SOUTH);
+
+      this.setLayout(new BorderLayout());
+      this.add(this.buttonPanel, BorderLayout.NORTH);
+      this.add(this.mainPanel, BorderLayout.CENTER);
       
       // CREATE LABELS ----------------------------------------------------
       // labels for computer
@@ -85,13 +134,13 @@ class View
       // add computer labels
       for (k = 0; k < Controller.NUM_CARDS_PER_HAND; k++)
       {
-         myCardTable.pn1ComputerHand.add(computerLabels[k]);
+         this.pn1ComputerHand.add(computerLabels[k]);
       }
 
       // add human labels
       for (k = 0; k < Controller.NUM_CARDS_PER_HAND; k++)
       {
-         myCardTable.pn1HumanHand.add(humanLabels[k]);
+         this.pn1HumanHand.add(humanLabels[k]);
       }
 
       // initial state for the game
@@ -105,29 +154,53 @@ class View
 
       for (k = 0; k < Controller.NUM_PLAYERS; k++)
       {
-         myCardTable.pn1PlayerArea.add(playedCardLabels[k]);
+         this.pn1PlayerArea.add(playedCardLabels[k]);
       }
 
       for (k = 0; k < Controller.NUM_PLAYERS; k++)
       {
-         myCardTable.pn1PlayerArea.add(playLabelText[k]);
+         this.pn1PlayerArea.add(playLabelText[k]);
       }
       for (k = 0; k < Controller.NUM_PLAYERS; k++)
       {
-         myCardTable.pn1PlayerArea.add(playerScoresLabels[k]);
+         this.pn1PlayerArea.add(playerScoresLabels[k]);
       }
 
       // show everything to the user
-      myCardTable.setVisible(true);
-      
+      this.setVisible(true);
    }
    
    /*
-    * This method returns the CardTable object stored in the View.
+    * This method returns the Exit Button for the CardTable.
     */
-   public CardTable getTable()
+   public JButton getExitButton()
    {
-      return this.myCardTable;
+      return this.exitButton;
+   }
+   
+   /*
+    * This method returns the New Game Button for the CardTable.
+    */
+   public JButton getnewGameButton()
+   {
+      return this.newGameButton;
+   }
+
+   /*
+    * This method returns the number of cards in a player's 
+    * hand in integer form.
+    */
+   public int getnumCardPerHand()
+   {
+      return numCardsPerHand;
+   }
+
+   /*
+    * This method returns the number of players in integer form.
+    */
+   public int getnumPlayers()
+   {
+      return numPlayers;
    }
 }
 
@@ -138,6 +211,8 @@ class View
 class Controller
 {
    
+   static final int MAX_CARDS_PER_HAND = 57;
+   static int MAX_PLAYERS = 2;
    static int NUM_CARDS_PER_HAND = 7;
    static int NUM_PLAYERS = 2;
    static boolean playerWinner = false;
@@ -153,7 +228,7 @@ class Controller
    CardGameFramework highCardGame;
    
    Model gameModel;
-   View gameView;
+   CardTableView gameView;
    
    
    /*
@@ -172,21 +247,21 @@ class Controller
       this.highCardGame.deal();
       
       this.gameModel = new Model(this);
-      this.gameView = new View(this);
+      this.gameView = new CardTableView(this, "CardTable", NUM_CARDS_PER_HAND, NUM_PLAYERS);
       
       // add mouse listener
       for (int k = 0; k < Controller.NUM_CARDS_PER_HAND; k++)
       {
-         gameView.getTable().pn1HumanHand.add(View.humanLabels[k]);
+         gameView.pn1HumanHand.add(CardTableView.humanLabels[k]);
          HandCardMouseListener listener = new HandCardMouseListener(k, 
             this.highCardGame);
-         View.humanLabels[k].addMouseListener(listener);
+         CardTableView.humanLabels[k].addMouseListener(listener);
       }
       
       // add button listener
-      this.gameView.getTable().getExitButton().addActionListener(
+      this.gameView.getExitButton().addActionListener(
          new GameButtonListener());
-      this.gameView.getTable().getnewGameButton().addActionListener(
+      this.gameView.getnewGameButton().addActionListener(
          new GameButtonListener());
       
    }
@@ -247,7 +322,7 @@ class Controller
 
       public void actionPerformed(ActionEvent e)
       {
-         View.playedCardLabels[0].setIcon(GUICard.getIcon(computerCard));
+         CardTableView.playedCardLabels[0].setIcon(GUICard.getIcon(computerCard));
       }
    }
    
@@ -275,7 +350,6 @@ class Controller
             Controller.lastPlayedCard = null;
             Controller.compWinner = false;
             Controller.playerWinner = false;
-            //Controller.main(newGame);
          } else
             System.out.println("Unexpected Button Error.");
       }
@@ -315,7 +389,7 @@ class Controller
 
          Card cardToPlay = game.getHand(1).playCard(cardIndex);
          System.out.println("Player is playing: " + cardToPlay);
-         View.playedCardLabels[1].setIcon(GUICard.getIcon(cardToPlay));
+         CardTableView.playedCardLabels[1].setIcon(GUICard.getIcon(cardToPlay));
 
          Card computerCard;
          if (lastPlayedCard != null)
@@ -360,8 +434,8 @@ class Controller
          checkRoundFinished();
          checkGameFinished();
 
-         View.playedCardLabels[0].setIcon(GUICard.getBackCardIcon());
-         View.playedCardLabels[1].setIcon(GUICard.getBackCardIcon());
+         CardTableView.playedCardLabels[0].setIcon(GUICard.getBackCardIcon());
+         CardTableView.playedCardLabels[1].setIcon(GUICard.getBackCardIcon());
 
          if (compWinner)
          {
@@ -422,12 +496,12 @@ class Controller
          {
             if (playerScores[0] > playerScores[1])
             {
-               View.playerScoresLabels[0].setText(playerScores[0] + 
+               CardTableView.playerScoresLabels[0].setText(playerScores[0] + 
                   ": Computer wins a round");
                totalScores[0]++;
             } else
             {
-               View.playerScoresLabels[1].setText(playerScores[1] + 
+               CardTableView.playerScoresLabels[1].setText(playerScores[1] + 
                   ": Player wins a round");
                totalScores[1]++;
             }
@@ -448,24 +522,24 @@ class Controller
          {
             if (totalScores[0] > totalScores[1])
             {
-               View.playerScoresLabels[0].setFont(
+               CardTableView.playerScoresLabels[0].setFont(
                   new Font("Serif", Font.BOLD, 18));
-               View.playerScoresLabels[0].setText("Computer won a game");
-               View.playerScoresLabels[1].setText("");
+               CardTableView.playerScoresLabels[0].setText("Computer won a game");
+               CardTableView.playerScoresLabels[1].setText("");
             } else if (totalScores[0] < totalScores[1])
             {
-               View.playerScoresLabels[1].setFont(
+               CardTableView.playerScoresLabels[1].setFont(
                   new Font("Serif", Font.BOLD, 18));
-               View.playerScoresLabels[1].setText("You won a game");
-               View.playerScoresLabels[0].setText("");
+               CardTableView.playerScoresLabels[1].setText("You won a game");
+               CardTableView.playerScoresLabels[0].setText("");
             } else
             {
-               View.playerScoresLabels[0].setFont(
+               CardTableView.playerScoresLabels[0].setFont(
                   new Font("Serif", Font.BOLD, 18));
-               View.playerScoresLabels[1].setFont(
+               CardTableView.playerScoresLabels[1].setFont(
                   new Font("Serif", Font.BOLD, 18));
-               View.playerScoresLabels[0].setText("Tie");
-               View.playerScoresLabels[1].setText("Game");
+               CardTableView.playerScoresLabels[0].setText("Tie");
+               CardTableView.playerScoresLabels[1].setText("Game");
             }
             playerWinner = false;
             compWinner = false;
@@ -482,10 +556,10 @@ class Controller
          {
             if (k >= hand.getNumCards())
             {
-               View.humanLabels[k].setIcon(GUICard.getBackCardIcon());
+               CardTableView.humanLabels[k].setIcon(GUICard.getBackCardIcon());
             } else
             {
-               View.humanLabels[k].setIcon(GUICard.getIcon(hand.inspectCard(k)));
+               CardTableView.humanLabels[k].setIcon(GUICard.getIcon(hand.inspectCard(k)));
             }
          }
       }
@@ -497,7 +571,7 @@ class Controller
       {
          for (int i = 0; i < NUM_PLAYERS; i++)
          {
-            View.playerScoresLabels[i].setText(
+            CardTableView.playerScoresLabels[i].setText(
                Integer.toString(playerScores[i]));
          }
       }
@@ -564,113 +638,6 @@ class Controller
 }
 
 
-/*
- * One object of class CardTable represents a table for a 
- * game of playing cards complete with multiple hands 
- * and main playing area.
- */
-class CardTable extends JFrame
-{
-
-   static final int MAX_CARDS_PER_HAND = 57;
-   static int MAX_PLAYERS = 2; // for now, we only allow 2 person games
-   private int numCardsPerHand;
-   private int numPlayers;
-
-   public JPanel pn1ComputerHand, pn1HumanHand, pn1PlayerArea, 
-      buttonPanel, mainPanel;
-
-   public JButton exitButton, newGameButton;
-
-   /*
-    * Constructor method for class CardTable creates the 
-    * graphical user interface.
-    */
-   public CardTable(String title, int numCardsPerHand, int numPlayers)
-   {
-      // filler for now
-      super(title);
-
-      // test parameters validity
-      if (numCardsPerHand < 0 || numCardsPerHand > MAX_CARDS_PER_HAND 
-         || numPlayers < 0 || numPlayers > MAX_PLAYERS)
-      {
-         return;
-      }
-
-      this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-      this.numCardsPerHand = numCardsPerHand;
-      this.numPlayers = numPlayers;
-
-      // create button panel
-      this.buttonPanel = new JPanel();
-      this.buttonPanel.setLayout(new BorderLayout());
-      this.exitButton = new JButton("Exit Game");
-      this.newGameButton = new JButton("Start New Game");
-      this.buttonPanel.add(this.exitButton, BorderLayout.WEST);
-      this.buttonPanel.add(this.newGameButton, BorderLayout.EAST);
-      this.add(buttonPanel);
-
-      // layout computer player hands
-      pn1ComputerHand = new JPanel();
-      pn1ComputerHand.setLayout(new GridLayout(1, numCardsPerHand));
-      pn1ComputerHand.setBorder(new TitledBorder("Computer Hand"));
-
-      // layout center playing area
-      pn1PlayerArea = new JPanel();
-      pn1PlayerArea.setLayout(new GridLayout(3, numPlayers));
-      pn1PlayerArea.setBorder(new TitledBorder("Playing Area"));
-
-      // layout human player hands
-      pn1HumanHand = new JPanel();
-      pn1HumanHand.setLayout(new GridLayout(1, numCardsPerHand));
-      pn1HumanHand.setBorder(new TitledBorder("Your Hand"));
-
-      this.mainPanel = new JPanel();
-      this.mainPanel.setLayout(new BorderLayout());
-      this.mainPanel.add(pn1ComputerHand, BorderLayout.NORTH);
-      this.mainPanel.add(pn1PlayerArea, BorderLayout.CENTER);
-      this.mainPanel.add(pn1HumanHand, BorderLayout.SOUTH);
-
-      this.setLayout(new BorderLayout());
-      this.add(this.buttonPanel, BorderLayout.NORTH);
-      this.add(this.mainPanel, BorderLayout.CENTER);
-
-   }
-   
-   /*
-    * This method returns the Exit Button for the CardTable.
-    */
-   public JButton getExitButton()
-   {
-      return this.exitButton;
-   }
-   
-   /*
-    * This method returns the New Game Button for the CardTable.
-    */
-   public JButton getnewGameButton()
-   {
-      return this.newGameButton;
-   }
-
-   /*
-    * This method returns the number of cards in a player's 
-    * hand in integer form.
-    */
-   public int getnumCardPerHand()
-   {
-      return numCardsPerHand;
-   }
-
-   /*
-    * This method returns the number of players in integer form.
-    */
-   public int getnumPlayers()
-   {
-      return numPlayers;
-   }
-}
 
 /*
  * One object of class GUICard represents a standard playing Card with a
