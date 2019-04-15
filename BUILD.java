@@ -46,6 +46,7 @@ class Model
       return deck.dealCard();
    }
 
+   
    /*
     * Makes human move and tests the game logic. Method processes two states: when
     * a human is to make the first move (lastPlayedCard is null) and when a
@@ -350,7 +351,7 @@ class CardTableView extends JFrame
       // initial state for the game
       for (k = 0; k < Controller.NUM_PLAYERS; k++)
       {
-         playedCardLabels[k] = new JLabel(GUICard.getBackCardIcon());
+         playedCardLabels[k] = new JLabel(GUICard.getIcon(gameController.getCardFromDeck()));
          playerScoresLabels[k] = new JLabel("0", SwingConstants.CENTER);
          playLabelText[k] = new JLabel(k == 0 ? "Computer" : "You", SwingConstants.CENTER);
       }
@@ -550,7 +551,7 @@ class Controller
    int numJokersPerPack;
    int numUnusedCardsPerPack;
    Card[] unusedCardsPerPack;
-   CardGameFramework highCardGame;
+   CardGameFramework buildGame;
 
    public Model gameModel;
    public CardTableView gameView;
@@ -566,9 +567,9 @@ class Controller
       this.numUnusedCardsPerPack = 0;
       this.unusedCardsPerPack = null;
 
-      this.highCardGame = new CardGameFramework(numPacksPerDeck, numJokersPerPack, numUnusedCardsPerPack,
+      this.buildGame = new CardGameFramework(numPacksPerDeck, numJokersPerPack, numUnusedCardsPerPack,
             unusedCardsPerPack, NUM_PLAYERS, NUM_CARDS_PER_HAND);
-      this.highCardGame.deal();
+      this.buildGame.deal();
 
       this.gameModel = new Model(this);
       this.gameView = new CardTableView(this, "CardTable", NUM_CARDS_PER_HAND, NUM_PLAYERS);
@@ -577,7 +578,7 @@ class Controller
       for (int k = 0; k < Controller.NUM_CARDS_PER_HAND; k++)
       {
          gameView.pn1HumanHand.add(CardTableView.humanLabels[k]);
-         HandCardMouseListener listener = new HandCardMouseListener(k, this.highCardGame, this.gameModel);
+         HandCardMouseListener listener = new HandCardMouseListener(k, this.buildGame, this.gameModel);
          CardTableView.humanLabels[k].addMouseListener(listener);
       }
 
@@ -587,7 +588,11 @@ class Controller
       this.gameView.getCannotPlayButton().addActionListener(new GameButtonListener(this));
 
    }
-
+   
+      public Card getCardFromDeck()
+      {
+         return this.buildGame.getCardFromDeck();
+      }
    /*
     * This method receives an integer index and new score, and then sets that item
     * in player score to the new given score.
@@ -601,6 +606,7 @@ class Controller
          System.out.println("Error setting player score");
    }
 
+   
    /*
     * This method receives an integer index and new score, and then sets that item
     * in total score to the new given score.
@@ -771,7 +777,7 @@ class Controller
     */
    public CardGameFramework getGame()
    {
-      return this.highCardGame;
+      return this.buildGame;
    }
 
    /*
@@ -841,7 +847,7 @@ class Controller
     */
    public HandCardMouseListener getHandCardListener()
    {
-      return new HandCardMouseListener(1, this.highCardGame, this.gameModel);
+      return new HandCardMouseListener(1, this.buildGame, this.gameModel);
    }
 
    /*
@@ -997,8 +1003,8 @@ class Controller
             gameController.setPlayerWinner(false);
             gameController.requestResetScores();
             gameController.requestScoreRedraw();
-            highCardGame.newGame();
-            highCardGame.deal();
+            buildGame.newGame();
+            buildGame.deal();
             gameView.redrawPlayerHand();
 
          } else
