@@ -585,7 +585,7 @@ class CardTableView extends JFrame {
    /*
     * This method returns the number of cards in a player's hand in integer form.
     */
-   public int getnumCardPerHand() {
+   public int getNumCardPerHand() {
       return numCardsPerHand;
    }
 
@@ -600,7 +600,7 @@ class CardTableView extends JFrame {
    /*
     * This method returns the number of players in integer form.
     */
-   public int getnumPlayers() {
+   public int getNumPlayers() {
       return numPlayers;
    }
 
