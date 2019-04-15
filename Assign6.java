@@ -2,7 +2,7 @@
 /*Team 9 - W. Robleh, M. Mariscal, T. Doan, Y. Nikulyak, C. Piwarski
  * CST338 - Software Design
  * Assignment 6
- * This assignments builds upon on GUICard game implementation by converting
+ * This assignments builds upon on GUI game implementation by converting
  * everything to a Model-View-Controller Standard, adding multi-threading, and
  * implementing a timer for the game.
  */
@@ -61,13 +61,13 @@ class Model
 
       Card cardToPlay = gameController.getGame().getHand(1).playCard(cardIndex);
       System.out.println("Player is playing: " + cardToPlay);
-      CardTableView.playedCardLabels[1].setIcon(GUICard.getIcon(cardToPlay));
+      gameController.requestSetPlayedCard(1, cardToPlay);
 
       Card computerCard;
-      if (Controller.lastPlayedCard != null)
+      if (gameController.getLastPlayedCard() != null)
       {
-         computerCard = Controller.lastPlayedCard;
-         Controller.lastPlayedCard = null;
+         computerCard = gameController.getLastPlayedCard();
+         gameController.setLastPlayedCard(null);
       } else
       {
          computerCard = makeComputerMove(gameController.getGame());
@@ -76,14 +76,14 @@ class Model
       // check mini winner for every 2 cards
       if (cardToPlay.compareTo(computerCard) < 0)
       {
-         Controller.playerScores[0]++;
-         Controller.compWinner = true;
-         Controller.playerWinner = false;
+         gameController.incrementPlayerScore(0);
+         gameController.setComputerWinner(true);
+         gameController.setPlayerWinner(false);
       } else
       {
-         Controller.playerScores[1]++;
-         Controller.playerWinner = true;
-         Controller.compWinner = false;
+         gameController.incrementPlayerScore(1);
+         gameController.setComputerWinner(false);
+         gameController.setPlayerWinner(true);
       }
 
       this.gameController.requestPlayerHandRedraw();
@@ -105,8 +105,7 @@ class Model
       checkRoundFinished();
       checkGameFinished();
 
-      CardTableView.playedCardLabels[0].setIcon(GUICard.getBackCardIcon());
-      CardTableView.playedCardLabels[1].setIcon(GUICard.getBackCardIcon());
+      gameController.requestResetPlayedCards();
 
       if (Controller.compWinner)
       {
@@ -165,14 +164,14 @@ class Model
       if (gameController.getGame().getHand(0).getNumCards() <= 0
             && gameController.getGame().getHand(1).getNumCards() <= 0)
       {
-         if (Controller.playerScores[0] > Controller.playerScores[1])
+         if (gameController.getPlayerScore(0) > gameController.getPlayerScore(1))
          {
-            CardTableView.playerScoresLabels[0].setText(Controller.playerScores[0] + ": Computer wins a round");
-            Controller.totalScores[0]++;
+            gameController.computerWinsRound();
+            gameController.incrementTotalScore(0);
          } else
          {
-            CardTableView.playerScoresLabels[1].setText(Controller.playerScores[1] + ": Player wins a round");
-            Controller.totalScores[1]++;
+            gameController.playerWinsRound();
+            gameController.incrementTotalScore(1);
          }
 
          gameController.getGame().deal();
@@ -189,22 +188,15 @@ class Model
       if (gameController.getGame().getHand(1).getNumCards() <= 0
             && gameController.getGame().getNumCardsRemainingInDeck() <= 0)
       {
-         if (Controller.totalScores[0] > Controller.totalScores[1])
+         if (gameController.getTotalScore(0) > gameController.getTotalScore(1))
          {
-            CardTableView.playerScoresLabels[0].setFont(new Font("Serif", Font.BOLD, 18));
-            CardTableView.playerScoresLabels[0].setText("Computer won a game");
-            CardTableView.playerScoresLabels[1].setText("");
-         } else if (Controller.totalScores[0] < Controller.totalScores[1])
+            gameController.computerWinsGame();
+         } else if (gameController.getTotalScore(0) < gameController.getTotalScore(1))
          {
-            CardTableView.playerScoresLabels[1].setFont(new Font("Serif", Font.BOLD, 18));
-            CardTableView.playerScoresLabels[1].setText("You won a game");
-            CardTableView.playerScoresLabels[0].setText("");
+            gameController.playerWinsGame();
          } else
          {
-            CardTableView.playerScoresLabels[0].setFont(new Font("Serif", Font.BOLD, 18));
-            CardTableView.playerScoresLabels[1].setFont(new Font("Serif", Font.BOLD, 18));
-            CardTableView.playerScoresLabels[0].setText("Tie");
-            CardTableView.playerScoresLabels[1].setText("Game");
+            gameController.tieGame();
          }
          Controller.playerWinner = false;
          Controller.compWinner = false;
@@ -214,22 +206,31 @@ class Model
    /*
     * refresh score after each round to start count against to see who will win
     */
-   public static void resetScores()
+   private static void resetPlayerScores()
    {
       for (int i = 0; i < Controller.NUM_PLAYERS; i++)
       {
-         Controller.playerScores[i] = 0;
+         Controller.setPlayerScore(i, 0);
       }
+   }
+
+   /*
+    * This method resets both the player scores and the total scores.
+    */
+   public void resetScores()
+   {
+      resetPlayerScores();
+      resetTotalScores();
    }
 
    /*
     * reset winner/loser total scores after game ends
     */
-   public void resetTotalScores()
+   private void resetTotalScores()
    {
       for (int i = 0; i < Controller.NUM_PLAYERS; i++)
       {
-         Controller.totalScores[i] = 0;
+         Controller.setTotalScore(i, 0);
       }
    }
 }
@@ -253,10 +254,14 @@ class CardTableView extends JFrame
 
    public JPanel pn1ComputerHand, pn1HumanHand, pn1PlayerArea, buttonPanel, mainPanel;
 
-   public JButton exitButton, newGameButton;
+   public JButton exitButton, newGameButton, cannotPlayButton;
 
    Controller gameController;
 
+   /*
+    * Constructor method for class CardTableView initializes the JFrame for the
+    * Card game.
+    */
    public CardTableView(Controller gameController, String title, int numCardsPerHand, int numPlayers)
    {
 
@@ -273,7 +278,7 @@ class CardTableView extends JFrame
       this.gameController = gameController;
       this.numCardsPerHand = numCardsPerHand;
       this.numPlayers = numPlayers;
-      this.setSize(800, 625);
+      this.setSize(700, 650);
       this.setLocationRelativeTo(null);
       this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -283,8 +288,13 @@ class CardTableView extends JFrame
       this.buttonPanel = new JPanel();
       this.buttonPanel.setLayout(new BorderLayout());
       this.exitButton = new JButton("Exit Game");
+      this.exitButton.setPreferredSize(new Dimension(250, 25));
       this.newGameButton = new JButton("Start New Game");
+      this.newGameButton.setPreferredSize(new Dimension(250, 25));
+      this.cannotPlayButton = new JButton("I Cannot Play");
+      this.cannotPlayButton.setPreferredSize(new Dimension(150, 25));
       this.buttonPanel.add(this.exitButton, BorderLayout.WEST);
+      this.buttonPanel.add(this.cannotPlayButton, BorderLayout.CENTER);
       this.buttonPanel.add(this.newGameButton, BorderLayout.EAST);
       this.add(buttonPanel);
 
@@ -373,11 +383,47 @@ class CardTableView extends JFrame
    }
 
    /*
+    * This method receives an integer index and Card object. It sets the indexed
+    * played card label with the provided Card's icon
+    */
+   public void setPlayedCard(int index, Card computerCard)
+   {
+      // CardTableView.playedCardLabels[0].setIcon(GUICard.getIcon(computerCard));
+      CardTableView.playedCardLabels[index].setIcon(GUICard.getIcon(computerCard));
+   }
+
+   /*
+    * This method receives an integer index and Card object. It sets the indexed
+    * computer player label with the provided Card's icon
+    */
+   public void setComputerCard(int index, Card computerCard)
+   {
+      CardTableView.computerLabels[index].setIcon(GUICard.getIcon(computerCard));
+   }
+
+   /*
+    * This method receives an integer index and Card object. It sets the indexed
+    * human player label with the provided Card's icon
+    */
+   public void setPlayerCard(int index, Card playerCard)
+   {
+      CardTableView.humanLabels[index].setIcon(GUICard.getIcon(playerCard));
+   }
+
+   /*
     * This method returns the New Game Button for the CardTable.
     */
    public JButton getnewGameButton()
    {
       return this.newGameButton;
+   }
+
+   /*
+    * This method returns the Cannot Play Button for the CardTable.
+    */
+   public JButton getCannotPlayButton()
+   {
+      return this.cannotPlayButton;
    }
 
    /*
@@ -389,11 +435,38 @@ class CardTableView extends JFrame
    }
 
    /*
+    * This method resets played card labels to the back card icon.
+    */
+   public void resetPlayedCardLabels()
+   {
+      CardTableView.playedCardLabels[0].setIcon(GUICard.getBackCardIcon());
+      CardTableView.playedCardLabels[1].setIcon(GUICard.getBackCardIcon());
+   }
+
+   /*
     * This method returns the number of players in integer form.
     */
    public int getnumPlayers()
    {
       return numPlayers;
+   }
+
+   /*
+    * This method sets the player score label to declare that the human player won
+    * the round.
+    */
+   public void setPlayerWinsText()
+   {
+      playerScoresLabels[1].setText(Controller.playerScores[1] + ": Player wins a round");
+   }
+
+   /*
+    * This method sets the player score label to declare that the computer player
+    * won the round.
+    */
+   public void setComputerWinsText()
+   {
+      playerScoresLabels[0].setText(Controller.playerScores[0] + ": Computer wins a round");
    }
 
    /*
@@ -425,10 +498,41 @@ class CardTableView extends JFrame
          }
       }
    }
+
+   /*
+    * This method reconfigures the GUI to display that the computer player has won.
+    */
+   public void displayComputerWin()
+   {
+      CardTableView.playerScoresLabels[0].setFont(new Font("Serif", Font.BOLD, 18));
+      CardTableView.playerScoresLabels[0].setText("Computer won a game");
+      CardTableView.playerScoresLabels[1].setText("");
+   }
+
+   /*
+    * This method reconfigures the GUI to display that the human player has won.
+    */
+   public void displayPlayerWin()
+   {
+      CardTableView.playerScoresLabels[1].setFont(new Font("Serif", Font.BOLD, 18));
+      CardTableView.playerScoresLabels[1].setText("You won a game");
+      CardTableView.playerScoresLabels[0].setText("");
+   }
+
+   /*
+    * This method reconfigures the GUI to display a Tie Game has been reached.
+    */
+   public void displayTieGame()
+   {
+      CardTableView.playerScoresLabels[0].setFont(new Font("Serif", Font.BOLD, 18));
+      CardTableView.playerScoresLabels[1].setFont(new Font("Serif", Font.BOLD, 18));
+      CardTableView.playerScoresLabels[0].setText("Tie");
+      CardTableView.playerScoresLabels[1].setText("Game");
+   }
 }
 
 /*
- * One object of class Controller controls the GUI and Model for the game.
+ * One object of class Controller controls the GUI and Model for the card game.
  */
 class Controller
 {
@@ -453,7 +557,8 @@ class Controller
    public CardTableView gameView;
 
    /*
-    * This is the constructor method for class Controller.
+    * This is the constructor method for class Controller. It initializes the
+    * button and mouse listeners needed to play the card game.
     */
    public Controller()
    {
@@ -480,16 +585,98 @@ class Controller
       // add button listener
       this.gameView.getExitButton().addActionListener(new GameButtonListener(this));
       this.gameView.getnewGameButton().addActionListener(new GameButtonListener(this));
+      this.gameView.getCannotPlayButton().addActionListener(new GameButtonListener(this));
 
+   }
+
+   /*
+    * This method receives an integer index and new score, and then sets that item
+    * in player score to the new given score.
+    */
+   public static void setPlayerScore(int index, int newScore)
+   {
+      if (index >= 0 && index <= NUM_PLAYERS)
+      {
+         Controller.playerScores[index] = newScore;
+      } else
+         System.out.println("Error setting player score");
+   }
+
+   /*
+    * This method receives an integer index and new score, and then sets that item
+    * in total score to the new given score.
+    */
+   public static void setTotalScore(int index, int newScore)
+   {
+      if (index >= 0 && index <= NUM_PLAYERS)
+      {
+         Controller.playerScores[index] = newScore;
+      } else
+         System.out.println("Error setting player score");
    }
 
    /*
     * This method instructs the Controller object to redraw the player hand in the
     * CardTableView.
+    *
     */
    public void requestPlayerHandRedraw()
    {
       gameView.redrawPlayerHand();
+   }
+
+   /*
+    * This method receives an integer index and returns the integer associated
+    * total score.
+    */
+   public int getTotalScore(int index)
+   {
+      if (index >= 0 && index <= NUM_PLAYERS)
+      {
+         return totalScores[index];
+      } else
+         return 0;
+   }
+
+   /*
+    * This method receives an integer index and returns the integer associated
+    * player score.
+    */
+   public int getPlayerScore(int index)
+   {
+      if (index >= 0 && index <= NUM_PLAYERS)
+      {
+         return playerScores[index];
+      } else
+         return 0;
+   }
+
+   /*
+    * This method receives an integer index and increments that totalScore item in
+    * the array.
+    */
+   public boolean incrementTotalScore(int index)
+   {
+      if (index >= 0 && index < NUM_PLAYERS)
+      {
+         Controller.totalScores[index]++;
+         return true;
+      } else
+         return false;
+   }
+
+   /*
+    * This method receives an integer index and increments that playerScore item in
+    * the array.
+    */
+   public boolean incrementPlayerScore(int index)
+   {
+      if (index >= 0 && index < NUM_PLAYERS)
+      {
+         Controller.playerScores[index]++;
+         return true;
+      } else
+         return false;
    }
 
    /*
@@ -502,11 +689,136 @@ class Controller
    }
 
    /*
+    * This method requests that the Controller resets the playedCardLabels to the
+    * back card icons in the CardTableView.
+    */
+   public void requestResetPlayedCards()
+   {
+      gameView.resetPlayedCardLabels();
+   }
+
+   /*
+    * This method instructs the game Model to reset the player and total scores.
+    */
+   public void requestResetScores()
+   {
+      gameModel.resetScores();
+   }
+
+   /*
+    * This method requests that the Controller resets the playedCardLabels to the
+    * back card icons in the CardTableView.
+    */
+   public void requestSetPlayedCard(int index, Card computerCard)
+   {
+      // CardTableView.playedCardLabels[0].setIcon(GUICard.getIcon(computerCard));
+      gameView.setPlayedCard(index, computerCard);
+   }
+
+   /*
+    * This method receives an array index and Card object. The controller then sets
+    * the indexed player card icon in the view with the icon for the given Card.
+    */
+   public void requestSetPlayerCard(int index, Card playerCard)
+   {
+      gameView.setPlayerCard(index, playerCard);
+   }
+
+   /*
+    * This method receives an array index and Card object. The controller then sets
+    * the indexed Computer card icon in the view with the icon for the given Card.
+    */
+   public void requestSetComputerCard(int index, Card computerCard)
+   {
+      gameView.setComputerCard(index, computerCard);
+   }
+
+   /*
+    * This method sets the player winner flag to the given boolean condition.
+    */
+   public boolean setPlayerWinner(boolean condition)
+   {
+      playerWinner = condition;
+      return true;
+   }
+
+   /*
+    * This method sets the computer winner flag to the given boolean condition.
+    */
+   public boolean setComputerWinner(boolean condition)
+   {
+      compWinner = condition;
+      return true;
+   }
+
+   /*
+    * This method returns the last played Card object.
+    */
+   public Card getLastPlayedCard()
+   {
+      return Controller.lastPlayedCard;
+   }
+
+   /*
+    * This method receives a Card object and sets it as the last played Card.
+    */
+   public void setLastPlayedCard(Card newCard)
+   {
+      Controller.lastPlayedCard = newCard;
+   }
+
+   /*
     * This method returns the CardGameFramework stored in the this Controller.
     */
    public CardGameFramework getGame()
    {
       return this.highCardGame;
+   }
+
+   /*
+    * This method handles all the controller activity for when the human player
+    * wins a round.
+    */
+   public void playerWinsRound()
+   {
+      gameView.setPlayerWinsText();
+      System.out.println("You win this round.");
+   }
+
+   /*
+    * This method handles all the controller activity for when the computer player
+    * wins a round.
+    */
+   public void computerWinsRound()
+   {
+      gameView.setComputerWinsText();
+      System.out.println("Computer wins this round.");
+   }
+
+   /*
+    * This method handles all the controller activity for when the computer player
+    * wins a game.
+    */
+   public void computerWinsGame()
+   {
+      gameView.displayComputerWin();
+   }
+
+   /*
+    * This method handles all the controller activity for when the human player
+    * wins a game.
+    */
+   public void playerWinsGame()
+   {
+      gameView.displayPlayerWin();
+   }
+
+   /*
+    * This method handles all the controller activity for when the game is a tie.
+    */
+   public void tieGame()
+   {
+      gameView.displayTieGame();
    }
 
    /*
@@ -522,7 +834,7 @@ class Controller
     */
    public RefreshCompCardListener getRefreshCompCardListener(Card computerCard)
    {
-      return new RefreshCompCardListener(computerCard);
+      return new RefreshCompCardListener(computerCard, this);
    }
 
    /*
@@ -569,13 +881,15 @@ class Controller
    {
 
       private final Card computerCard;
+      private Controller gameController;
 
       /*
        * Constructor method for RefreshCompCardListener
        */
-      public RefreshCompCardListener(Card computerCard)
+      public RefreshCompCardListener(Card computerCard, Controller newController)
       {
          this.computerCard = computerCard;
+         this.gameController = newController;
       }
 
       /*
@@ -584,7 +898,7 @@ class Controller
       @Override
       public void actionPerformed(ActionEvent e)
       {
-         CardTableView.playedCardLabels[0].setIcon(GUICard.getIcon(computerCard));
+         gameController.requestSetPlayedCard(0, computerCard);
       }
    }
 
@@ -596,7 +910,6 @@ class Controller
    {
 
       private final int cardIndex;
-      // private final CardGameFramework game;
       private Model gameModel;
 
       /*
@@ -605,7 +918,6 @@ class Controller
       public HandCardMouseListener(int cardIndex, CardGameFramework game, Model gameModel)
       {
          this.cardIndex = cardIndex;
-         // this.game = game;
          this.gameModel = gameModel;
       }
 
@@ -675,31 +987,19 @@ class Controller
          {
             System.out.println("Ending Game.");
             System.exit(0);
+         } else if (buttonString.equals("I Cannot Play"))
+         {
+            System.out.println("I Cannot Play Was Pressed");
          } else if (buttonString.equals("Start New Game"))
          {
-            int i;
-            System.out.println("New Game Started.");
-            for (i = 0; i < Controller.totalScores.length; i++)
-               Controller.totalScores[i] = 0;
-            for (i = 0; i < Controller.playerScores.length; i++)
-               Controller.playerScores[i] = 0;
-            for (i = 0; i < NUM_PLAYERS; i++)
-            {
-               CardTableView.playerScoresLabels[i].setText(Integer.toString(playerScores[i]));
-            }
-            for (i = 0; i < NUM_CARDS_PER_HAND; i++)
-            {
-               CardTableView.humanLabels[i].setIcon(GUICard.getBackCardIcon());
-            }
-            for (i = 0; i < NUM_PLAYERS; i++)
-               CardTableView.playedCardLabels[i].setIcon(GUICard.getBackCardIcon());
-
-            Controller.lastPlayedCard = null;
-            Controller.compWinner = false;
-            Controller.playerWinner = false;
+            gameController.requestResetPlayedCards();
+            gameController.setLastPlayedCard(null);
+            gameController.setComputerWinner(false);
+            gameController.setPlayerWinner(false);
+            gameController.requestResetScores();
+            gameController.requestScoreRedraw();
             highCardGame.newGame();
             highCardGame.deal();
-            Model.resetScores();
             gameView.redrawPlayerHand();
 
          } else
