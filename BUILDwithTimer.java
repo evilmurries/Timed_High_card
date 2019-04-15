@@ -13,7 +13,7 @@ import javax.swing.border.*;
 
 import javax.swing.*;
 
-public class BUILD {
+public class Build {
    public static void main(String[] args) {
       @SuppressWarnings("unused")
       Controller gameController = new Controller();
@@ -526,31 +526,48 @@ class CardTableView extends JFrame {
     * This method receives an integer index and Card object. It sets the indexed
     * played card label with the provided Card's icon
     */
-   public void setPlayedCard(int index, Card computerCard) {
-      // CardTableView.playedCardLabels[0].setIcon(GUICard.getIcon(computerCard));
+   public boolean setPlayedCard(int index, Card computerCard) {
+      if (index >= 0 && index <= Controller.NUM_PLAYERS)
+      {
       CardTableView.playedCardLabels[index].setIcon(GUICard.getIcon(computerCard));
+      return true;
+      }
+      else
+         return false;
    }
 
    /*
     * This method receives an integer index and Card object. It sets the indexed
     * computer player label with the provided Card's icon
     */
-   public void setComputerCard(int index, Card computerCard) {
+   public boolean setComputerCard(int index, Card computerCard) {
+      if (index >= 0 && index <= Controller.NUM_PLAYERS)
+      {
       CardTableView.computerLabels[index].setIcon(GUICard.getIcon(computerCard));
+      return true;
+      }
+      else
+         return false;
    }
 
    /*
     * This method receives an integer index and Card object. It sets the indexed
     * human player label with the provided Card's icon
     */
-   public void setPlayerCard(int index, Card playerCard) {
-      CardTableView.humanLabels[index].setIcon(GUICard.getIcon(playerCard));
+   public boolean setPlayerCard(int index, Card playerCard) {
+      if (index >= 0 && index <= Controller.NUM_PLAYERS)
+      {
+         CardTableView.humanLabels[index].setIcon(GUICard.getIcon(playerCard));
+         return true;
+      }
+      else
+         return false;
    }
 
    /*
     * This method returns the New Game Button for the CardTable.
     */
-   public JButton getnewGameButton() {
+   public JButton getNewGameButton() {
       return this.newGameButton;
    }
 
@@ -561,7 +578,7 @@ class CardTableView extends JFrame {
       return this.cannotPlayButton;
    }
    
-   public JButton getSratStopButton() {
+   public JButton getStartStopButton() {
       return this.startStopButton;
    }
 
@@ -706,9 +723,9 @@ class Controller {
 
       // add button listener
       this.gameView.getExitButton().addActionListener(new GameButtonListener(this));
-      this.gameView.getnewGameButton().addActionListener(new GameButtonListener(this));
+      this.gameView.getNewGameButton().addActionListener(new GameButtonListener(this));
       this.gameView.getCannotPlayButton().addActionListener(new GameButtonListener(this));
-      this.gameView.getSratStopButton().addActionListener(new StartStopListener(this, this.gameModel));
+      this.gameView.getStartStopButton().addActionListener(new StartStopListener(this, this.gameModel));
 
       this.gameModel.getTimer().startTimer(); // Starts measuring the time.
    }
@@ -748,22 +765,33 @@ class Controller {
     * This method receives an integer index and new score, and then sets that item
     * in player score to the new given score.
     */
-   public static void setPlayerScore(int index, int newScore) {
-      if (index >= 0 && index <= NUM_PLAYERS) {
+   public static boolean setPlayerScore(int index, int newScore) {
+      if (index >= 0 && index <= NUM_PLAYERS) 
+      {
          Controller.playerScores[index] = newScore;
-      } else
+         return true;
+      } 
+      else
+      {
          System.out.println("Error setting player score");
+         return false;
+      }
    }
 
    /*
     * This method receives an integer index and new score, and then sets that item
     * in total score to the new given score.
     */
-   public static void setTotalScore(int index, int newScore) {
+   public static boolean setTotalScore(int index, int newScore) {
       if (index >= 0 && index <= NUM_PLAYERS) {
          Controller.playerScores[index] = newScore;
-      } else
+         return true;
+      } 
+      else
+      {
          System.out.println("Error setting player score");
+         return false;
+      }
    }
 
    /*
@@ -856,41 +884,45 @@ class Controller {
     * This method requests that the Controller resets the playedCardLabels to the
     * back card icons in the CardTableView.
     */
-   public void requestSetPlayedCard(int index, Card computerCard) {
+   public boolean requestSetPlayedCard(int index, Card computerCard) {
       // CardTableView.playedCardLabels[0].setIcon(GUICard.getIcon(computerCard));
-      gameView.setPlayedCard(index, computerCard);
+      return gameView.setPlayedCard(index, computerCard);
    }
 
    /*
     * This method receives an array index and Card object. The controller then sets
     * the indexed player card icon in the view with the icon for the given Card.
     */
-   public void requestSetPlayerCard(int index, Card playerCard) {
-      gameView.setPlayerCard(index, playerCard);
+   public boolean requestSetPlayerCard(int index, Card playerCard) {
+      return gameView.setPlayerCard(index, playerCard);
    }
 
    /*
     * This method receives an array index and Card object. The controller then sets
     * the indexed Computer card icon in the view with the icon for the given Card.
     */
-   public void requestSetComputerCard(int index, Card computerCard) {
-      gameView.setComputerCard(index, computerCard);
+   public boolean requestSetComputerCard(int index, Card computerCard) {
+      return gameView.setComputerCard(index, computerCard);
    }
 
    /*
     * This method sets the player winner flag to the given boolean condition.
     */
    public boolean setPlayerWinner(boolean condition) {
-      playerWinner = condition;
-      return true;
+      if (playerWinner = condition)
+         return true;
+      else
+         return false;
    }
 
    /*
     * This method sets the computer winner flag to the given boolean condition.
     */
    public boolean setComputerWinner(boolean condition) {
-      compWinner = condition;
-      return true;
+      if (compWinner = condition)
+         return true;
+      else
+         return false;
    }
 
    /*
@@ -1128,6 +1160,7 @@ class Controller {
             System.exit(0);
          } else if (buttonString.equals("I Cannot Play")) {
             System.out.println("I Cannot Play Was Pressed");
+            // needs to increment cannot play counter for player
          } else if (buttonString.equals("Start New Game")) {
             gameController.requestResetPlayedCards();
             gameController.setLastPlayedCard(null);
