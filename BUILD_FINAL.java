@@ -19,6 +19,10 @@ public class BUILD1 {
     }
 }
 
+/*
+ * One object of class Timers represents a second timer for a card
+ * game.
+ */
 class Timers extends Thread {
 
     private final Controller controller;
@@ -31,6 +35,9 @@ class Timers extends Thread {
         this.controller = controller;
     }
 
+    /*
+     * This method begins operation of the Timers object.
+     */
     public void run() {
         boolean notifyController;
         long elapsedTime = 0;
@@ -52,10 +59,17 @@ class Timers extends Thread {
         }
     }
 
+    /*
+     * This method returns a boolean stating whether the timer
+     * is running or not.
+     */
     public boolean isTimerStarted() {
         return timerOn;
     }
 
+    /*
+     * This method starts the timer.
+     */
     public synchronized void startTimer() {
         if (!timerOn) {
             lastStart = System.currentTimeMillis() / 1000L;
@@ -63,6 +77,9 @@ class Timers extends Thread {
         }
     }
 
+    /*
+     * This method stops the timer.
+     */
     public synchronized void stopTimer() {
         if (timerOn) {
             long now = System.currentTimeMillis() / 1000L;
@@ -71,6 +88,9 @@ class Timers extends Thread {
         timerOn = false;
     }
 
+   /*
+     * This method puts the Timers object to sleep.
+     */
     public void doNothing() {
         try {
             Thread.sleep(1000);
@@ -215,6 +235,9 @@ class Model {
         System.out.println("Computer has finished playing.");
     }
 
+    /*
+     * This method determines whether the player can make a move.
+     */
     public boolean canPlayerMakeNextMove(int playerIndex) {
         for (int i = 0; i < gameController.getGame().getHand(playerIndex).getNumCards(); i++) {
             Card cardToInspect = gameController.getGame().getHand(playerIndex).inspectCard(i);
@@ -260,6 +283,9 @@ class Model {
         }
     }
 
+    /*
+     * This method resets the timer.
+     */
     public void resetTimer() {
         timer.resetTimer();
     }
@@ -403,6 +429,9 @@ class CardTableView extends JFrame {
         this.setVisible(true);
     }
 
+    /*
+     * This method updates the timer label.
+     */
     public void notifyTimeChanged(long totalElapsedSeconds) {
         long seconds = totalElapsedSeconds % 60;
         long minutes = (totalElapsedSeconds / 60) % 60;
@@ -410,10 +439,16 @@ class CardTableView extends JFrame {
         time.setText(String.format("%d:%02d:%02d", hours, minutes, seconds));
     }
 
+    /*
+     * This method resets the timer label.
+     */
     public void resetTimerView() {
         this.time.setText("0:00");
     }
 
+    /*
+     * This method changes the text on the timer button.
+     */
     public void notifyTimerStateChanged(boolean started) {
         startStopButton.setText(started ? "Stop Timer" : "Start Timer");
     }
@@ -468,6 +503,9 @@ class CardTableView extends JFrame {
         }
     }
     
+    /*
+     * This method resets the View font.
+     */
     public void resetFont() {
        for (int i = 0; i < Controller.NUM_PLAYERS; i++) {
           CardTableView.playerScoresLabels[i].setFont(new Font("Arial", Font.PLAIN, 14));;
