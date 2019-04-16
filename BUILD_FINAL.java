@@ -631,17 +631,26 @@ class Controller {
             System.out.println("Error setting player score");
     }
 
+    /*
+     * This method notifies the View that the time changed.
+     */
     public void notifyTimeChanged(long totalElapsedSeconds) {
         if (gameView == null) {
             return;
         }
         gameView.notifyTimeChanged(totalElapsedSeconds);
     }
-
+ 
+    /*
+     * This method notifies the view that the timer state has changed.
+     */
     public void notifyTimerStateChanged(boolean started) {
         gameView.notifyTimerStateChanged(started);
     }
 
+    /*
+     * This method takes a Card from the Deck and puts it in the main play area.
+     */
     public Card getCardFromDeckAndPutInPlayArea(int index) {
         Card card = this.buildGame.getCardFromDeck();
         if (card == null) {
@@ -684,10 +693,16 @@ class Controller {
             return false;
     }
 
+    /*
+     * This method asks the view to redraw the timer.
+     */
     public void requestTimerRedraw() {
         gameView.resetTimerView();
     }
-
+ 
+    /*
+     * This method asks the view to reset the timer.
+     */
     public void requestTimerReset() {
         gameModel.resetTimer();
     }
@@ -715,6 +730,9 @@ class Controller {
         gameModel.resetScores();
     }
     
+    /*
+     * This method requests that all View fonts are reset.
+     */
     public void requestResetFont() {
        gameView.resetFont();
     }
@@ -727,6 +745,9 @@ class Controller {
         gameView.setPlayedCard(index, card);
     }
 
+    /*
+     * This method schedules the computer's next move.
+     */
     public void schdeduleComputersNextMove() {
         Timer timer1 = new Timer(1500, new DelayedComputerMove(gameModel));
         timer1.setRepeats(false);
@@ -763,16 +784,25 @@ class Controller {
         gameView.displayTieGame();
     }
 
+    /*
+     * One object of class StartStopListener is a button listener for the timer button.
+     */
     static class StartStopListener implements ActionListener {
 
         private final Model model;
         private final Controller controller;
 
+        /*
+         * Constructor method for class StartStopListener
+         */
         public StartStopListener(Controller controller, Model model) {
             this.controller = controller;
             this.model = model;
         }
 
+        /*
+         * This method starts and stops the timer and updates the view.
+         */
         public void actionPerformed(ActionEvent e) {
             if (model.getTimer().isTimerStarted()) {
                 model.getTimer().stopTimer();
@@ -784,14 +814,24 @@ class Controller {
         }
     }
 
+    /*
+     * One object of class DelayedComputerMove represents a computer move in
+     * the card game.
+     */
     static class DelayedComputerMove implements ActionListener {
 
         private final Model model;
 
+        /*
+         * Constructor for class DelayedComputerMove.
+         */
         public DelayedComputerMove(Model model) {
             this.model = model;
         }
 
+        /*
+         * This method triggers the next computer player move.
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
             model.computerMove();
@@ -852,10 +892,17 @@ class Controller {
         }
     }
 
+    /*
+     * One object of class GameButtonListener represents a button listener for the 
+     * CardTableView.
+     */
     class GameButtonListener implements ActionListener {
 
         Controller gameController;
 
+        /*
+         * Constructor method for class GameButtonListener.
+         */
         public GameButtonListener(Controller gameController) {
             super();
             this.gameController = gameController;
