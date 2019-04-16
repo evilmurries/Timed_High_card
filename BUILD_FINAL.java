@@ -34,6 +34,9 @@ class Timers extends Thread
    private boolean continueTicks = true;
    private boolean timerOn = false;
 
+   /*
+    * Constructor method for class Timers.
+    */
    public Timers(Controller controller)
    {
       this.controller = controller;
@@ -140,8 +143,8 @@ class Timers extends Thread
 class Model
 {
    public static int NUMBER_OF_CARDS_IN_PLAY_AREA = 2;
-   Controller gameController;
-   Card[] playArea;
+   private Controller gameController;
+   private Card[] playArea;
    private Timers timer;
 
    /*
@@ -379,16 +382,22 @@ class Model
 @SuppressWarnings("serial")
 class CardTableView extends JFrame
 {
-   static JLabel[] computerLabels = new JLabel[Controller.NUM_CARDS_PER_HAND];
-   static JLabel[] humanLabels = new JLabel[Controller.NUM_CARDS_PER_HAND];
-   static JLabel[] playedCardLabels = new JLabel[Controller.NUM_PLAYERS];
-   static JLabel[] playLabelText = new JLabel[Controller.NUM_PLAYERS];
-   static JLabel[] playerScoresLabels = new JLabel[Controller.NUM_PLAYERS];
+   public static JLabel[] humanLabels = 
+      new JLabel[Controller.NUM_CARDS_PER_HAND];
+   private static JLabel[] computerLabels = 
+      new JLabel[Controller.NUM_CARDS_PER_HAND];
+   private static JLabel[] playedCardLabels = 
+      new JLabel[Controller.NUM_PLAYERS];
+   private static JLabel[] playLabelText = 
+      new JLabel[Controller.NUM_PLAYERS];
+   private static JLabel[] playerScoresLabels = 
+      new JLabel[Controller.NUM_PLAYERS];
    public JPanel pn1ComputerHand, pn1HumanHand, pn1PlayerArea, buttonPanel, 
       mainPanel, commonPanel, timer;
-   public JLabel time;
-   public JButton exitButton, newGameButton, cannotPlayButton, startStopButton;
-   Controller gameController;
+   private JLabel time;
+   private JButton exitButton, newGameButton, cannotPlayButton, 
+      startStopButton;
+   private Controller gameController;
 
    /*
     * Constructor method for class CardTableView initializes the JFrame for the
@@ -698,19 +707,20 @@ class CardTableView extends JFrame
 class Controller
 {
 
-   static final int MAX_CARDS_PER_HAND = 57;
-   static int MAX_PLAYERS = 2;
-   static int NUM_CARDS_PER_HAND = 7;
-   static int NUM_PLAYERS = 2;
-   static int[] playerScores = new int[NUM_PLAYERS];
-   static int[] totalScores = new int[NUM_PLAYERS];
+   public static final int MAX_CARDS_PER_HAND = 57;
+   public static int MAX_PLAYERS = 2;
+   public static int NUM_CARDS_PER_HAND = 7;
+   public static int NUM_PLAYERS = 2;
+   public static int[] playerScores = new int[NUM_PLAYERS];
+   private static int[] totalScores = new int[NUM_PLAYERS];
+   
    public final Model gameModel;
    public final CardTableView gameView;
-   public CardGameFramework buildGame;
-   int numPacksPerDeck;
-   int numJokersPerPack;
-   int numUnusedCardsPerPack;
-   Card[] unusedCardsPerPack;
+   private CardGameFramework buildGame;
+   private int numPacksPerDeck;
+   private int numJokersPerPack;
+   private int numUnusedCardsPerPack;
+   private Card[] unusedCardsPerPack;
 
    /*
     * This is the constructor method for class Controller. It initializes the
@@ -1131,7 +1141,7 @@ class Controller
          } else if (buttonString.equals("I cannot Play"))
          {
             System.out.println("I cannot Play Was Pressed");
-            gameModel.gameController.incrementPlayerScore(1);
+            gameController.incrementPlayerScore(1);
             gameModel.computerMove();
          } else if (buttonString.equals("Start New Game"))
          {
@@ -1420,11 +1430,11 @@ class GUICard
 class Card
 {
    // Public Static Data Members:
-   public static char[] valueRanks = new char[]
+   private static char[] valueRanks = new char[]
       { 'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'X' };
    // Private Data Members:
-   public char value;
-   public Suit suit = null;
+   private char value;
+   private Suit suit = null;
    private boolean errorFlag = false;
 
    /*
