@@ -467,6 +467,12 @@ class CardTableView extends JFrame {
             CardTableView.playerScoresLabels[i].setText(Integer.toString(Controller.playerScores[i]));
         }
     }
+    
+    public void resetFont() {
+       for (int i = 0; i < Controller.NUM_PLAYERS; i++) {
+          CardTableView.playerScoresLabels[i].setFont(new Font("Arial", Font.PLAIN, 14));;
+      }
+    }
 
     /*
      * redraw human hand every time 2 cards played to show how many cards left in a
@@ -670,6 +676,10 @@ class Controller {
     public void requestResetScores() {
         gameModel.resetScores();
     }
+    
+    public void requestResetFont() {
+       gameView.resetFont();
+    }
 
     /*
      * This method requests that the Controller resets the playedCardLabels to the
@@ -835,6 +845,7 @@ class Controller {
                 gameController.requestScoreRedraw();
                 gameController.requestTimerReset();
                 gameController.requestTimerRedraw();
+                gameController.requestResetFont();
                 buildGame.newGame();
                 buildGame.deal();
                 gameView.redrawPlayerHand();
