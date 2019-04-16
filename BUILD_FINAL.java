@@ -57,7 +57,8 @@ class Timers extends Thread
                long now = System.currentTimeMillis() / 1000L;
                elapsedTime = totalElapsedTimeInSeconds + now - lastStart;
                notifyController = true;
-            } else
+            } 
+            else
             {
                notifyController = false;
             }
@@ -66,13 +67,12 @@ class Timers extends Thread
          {
             controller.notifyTimeChanged(elapsedTime);
          }
-         // System.out.println(String.format(" Ticking thread %s: timer is %s.", getId(),
-         // timerOn ? "on" : "off"));
       }
    }
 
    /*
-    * This method returns a boolean stating whether the timer is running or not.
+    * This method returns a boolean stating whether the timer is 
+    * running or not.
     */
    public boolean isTimerStarted()
    {
@@ -118,7 +118,8 @@ class Timers extends Thread
    }
 
    /*
-    * Marks thread flag that it should stop continuing ticks and it is ok to exit
+    * Marks thread flag that it should stop continuing ticks 
+    * and it is ok to exit
     */
    public synchronized void stopThread()
    {
@@ -144,8 +145,8 @@ class Model
    private Timers timer;
 
    /*
-    * Constructor method for the Model class. This method receives a Controller
-    * object and saves the reference.
+    * Constructor method for the Model class. This method receives 
+    * a Controller object and saves the reference.
     */
    public Model(Controller gameController)
    {
@@ -156,7 +157,8 @@ class Model
    }
 
    /*
-    * refresh score after each round to start count against to see who will win
+    * refresh score after each round to start count against to 
+    * see who will win
     */
    private static void resetPlayerScores()
    {
@@ -185,11 +187,11 @@ class Model
    }
 
    /*
-    * Returns index of the card in play area which value is smaller or bigger than
-    * given card's value by 1.
+    * Returns index of the card in play area which value is smaller 
+    * or bigger than given card's value by 1.
     *
-    * Method takes cardToCompare Card to compare with. and return index or minus 1
-    * if there is no such card.
+    * Method takes cardToCompare Card to compare with. and return index 
+    * or minus 1 if there is no such card.
     */
    public int getCardInPlayAreaThatSmallerOrBigger(Card cardToCompare)
    {
@@ -210,9 +212,10 @@ class Model
    }
 
    /*
-    * Makes human move and tests the game logic. Method processes two states: when
-    * a human is to make the first move (lastPlayedCard is null) and when a
-    * computer has previously made its move (lastPlayedCard} is not null).
+    * Makes human move and tests the game logic. Method processes two 
+    * states: when a human is to make the first move (lastPlayedCard is null) 
+    * and when a computer has previously made its move (lastPlayedCard} 
+    * is not null).
     */
    public void makeHumanMove(int cardIndex)
    {
@@ -221,15 +224,17 @@ class Model
          return;
       }
 
-      Card cardToInspect = gameController.getGame().getHand(1).inspectCard(cardIndex);
-      int playAreaCardIndex = getCardInPlayAreaThatSmallerOrBigger(cardToInspect);
+      Card cardToInspect = gameController.getGame().getHand(1).
+         inspectCard(cardIndex);
+      int playAreaCardIndex = getCardInPlayAreaThatSmallerOrBigger(
+         cardToInspect);
       if (playAreaCardIndex < 0)
       {
          System.out.println("Player can't play: " + cardToInspect);
          return;
       }
-
-      Card cardToPlay = gameController.getGame().getHand(1).playCard(cardIndex);
+      Card cardToPlay = gameController.getGame().getHand(1).playCard(
+         cardIndex);
       System.out.println("Player is playing: " + cardToPlay);
       putCardInPlayArea(playAreaCardIndex, cardToPlay);
       gameController.requestSetPlayedCard(playAreaCardIndex, cardToPlay);
@@ -243,23 +248,28 @@ class Model
    }
 
    /*
-    * Tries to make a move by computer and if it is possible then it makes a single
-    * move, then it schedules a next move by computer so a human is able to see the
-    * card change in play area.
+    * Tries to make a move by computer and if it is possible then it makes 
+    * a single move, then it schedules a next move by computer so a human 
+    * is able to see the card change in play area.
     */
    public void computerMove()
    {
-      for (int i = 0; i < gameController.getGame().getHand(0).getNumCards(); i++)
+      for (int i = 0; i < gameController.getGame().getHand(0).getNumCards();
+         i++)
       {
-         Card cardToInspect = gameController.getGame().getHand(0).inspectCard(i);
-         int playAreaCardIndex = getCardInPlayAreaThatSmallerOrBigger(cardToInspect);
+         Card cardToInspect = gameController.getGame().getHand(0).
+            inspectCard(i);
+         int playAreaCardIndex = getCardInPlayAreaThatSmallerOrBigger(
+            cardToInspect);
          if (playAreaCardIndex >= 0)
          {
             System.out.println("Computer is playing: " + cardToInspect);
             gameController.getGame().getHand(0).playCard(i);
             putCardInPlayArea(playAreaCardIndex, cardToInspect);
-            gameController.requestSetPlayedCard(playAreaCardIndex, cardToInspect);
-            if (gameController.getGame().getHand(0).getNumCards() < Controller.NUM_CARDS_PER_HAND)
+            gameController.requestSetPlayedCard(playAreaCardIndex, 
+               cardToInspect);
+            if (gameController.getGame().getHand(0).getNumCards() < 
+               Controller.NUM_CARDS_PER_HAND)
             {
                Card cardToTake = gameController.getGame().getCardFromDeck();
                gameController.getGame().getHand(0).takeCard(cardToTake);
@@ -278,17 +288,22 @@ class Model
     */
    public boolean canPlayerMakeNextMove(int playerIndex)
    {
-      for (int i = 0; i < gameController.getGame().getHand(playerIndex).getNumCards(); i++)
+      for (int i = 0; i < gameController.getGame().getHand(playerIndex).
+         getNumCards(); i++)
       {
-         Card cardToInspect = gameController.getGame().getHand(playerIndex).inspectCard(i);
-         int playAreaCardIndex = getCardInPlayAreaThatSmallerOrBigger(cardToInspect);
+         Card cardToInspect = gameController.getGame().getHand(playerIndex).
+            inspectCard(i);
+         int playAreaCardIndex = getCardInPlayAreaThatSmallerOrBigger(
+            cardToInspect);
          if (playAreaCardIndex >= 0)
          {
-            System.out.println(String.format("     Can player %d move? %s.", playerIndex, "yes"));
+            System.out.println(String.format("     Can player %d move? %s.", 
+               playerIndex, "yes"));
             return true;
          }
       }
-      System.out.println(String.format("     Can player %d move? %s.", playerIndex, "no"));
+      System.out.println(String.format("     Can player %d move? %s.", 
+         playerIndex, "no"));
       return false;
    }
 
@@ -316,10 +331,13 @@ class Model
       if (gameController.getTotalScore(0) > gameController.getTotalScore(1))
       {
          gameController.playerWinsGame();
-      } else if (gameController.getTotalScore(0) < gameController.getTotalScore(1))
+      }
+      else if (gameController.getTotalScore(0) < gameController.
+         getTotalScore(1))
       {
          gameController.computerWinsGame();
-      } else
+      }
+      else
       {
          gameController.tieGame();
       }
@@ -355,43 +373,43 @@ class Model
 }
 
 /*
- * One object of class View contains the graphical user interface for the card
- * game.
+ * One object of class View contains the graphical user interface 
+ * for the card game.
  */
 @SuppressWarnings("serial")
 class CardTableView extends JFrame
 {
-
    static JLabel[] computerLabels = new JLabel[Controller.NUM_CARDS_PER_HAND];
    static JLabel[] humanLabels = new JLabel[Controller.NUM_CARDS_PER_HAND];
    static JLabel[] playedCardLabels = new JLabel[Controller.NUM_PLAYERS];
    static JLabel[] playLabelText = new JLabel[Controller.NUM_PLAYERS];
    static JLabel[] playerScoresLabels = new JLabel[Controller.NUM_PLAYERS];
-   public JPanel pn1ComputerHand, pn1HumanHand, pn1PlayerArea, buttonPanel, mainPanel, commonPanel, timer;
+   public JPanel pn1ComputerHand, pn1HumanHand, pn1PlayerArea, buttonPanel, 
+      mainPanel, commonPanel, timer;
    public JLabel time;
    public JButton exitButton, newGameButton, cannotPlayButton, startStopButton;
    Controller gameController;
-   private int numCardsPerHand;
 
    /*
     * Constructor method for class CardTableView initializes the JFrame for the
     * Card game.
     */
-   public CardTableView(Controller gameController, String title, int numCardsPerHand, int numPlayers)
+   public CardTableView(Controller gameController, String title, 
+         int numCardsPerHand, int numPlayers)
    {
 
       super(title);
 
       // test parameters validity
-      if (numCardsPerHand < 0 || numCardsPerHand > Controller.MAX_CARDS_PER_HAND || numPlayers < 0
-            || numPlayers > Controller.MAX_PLAYERS)
+      if (numCardsPerHand < 0 || numCardsPerHand > 
+         Controller.MAX_CARDS_PER_HAND || numPlayers < 0|| 
+         numPlayers > Controller.MAX_PLAYERS)
       {
          return;
       }
 
       // define main frame attributes
       this.gameController = gameController;
-      this.numCardsPerHand = numCardsPerHand;
       this.setSize(800, 650);
       this.setLocationRelativeTo(null);
       this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -458,7 +476,8 @@ class CardTableView extends JFrame
       // labels for human
       for (k = 0; k < Controller.NUM_CARDS_PER_HAND; k++)
       {
-         humanLabels[k] = new JLabel(GUICard.getIcon(gameController.getGame().getHand(1).inspectCard(k)));
+         humanLabels[k] = new JLabel(GUICard.getIcon(gameController.
+            getGame().getHand(1).inspectCard(k)));
       }
 
       // ADD LABELS TO PANELS -----------------------------------------
@@ -476,14 +495,16 @@ class CardTableView extends JFrame
 
       for (k = 0; k < Model.NUMBER_OF_CARDS_IN_PLAY_AREA; k++)
       {
-         playedCardLabels[k] = new JLabel(GUICard.getIcon(gameController.getCardFromDeckAndPutInPlayArea(k)));
+         playedCardLabels[k] = new JLabel(GUICard.getIcon(gameController.
+            getCardFromDeckAndPutInPlayArea(k)));
       }
 
       // initial state for the game
       for (k = 0; k < Controller.NUM_PLAYERS; k++)
       {
          playerScoresLabels[k] = new JLabel("0", SwingConstants.CENTER);
-         playLabelText[k] = new JLabel(k == 0 ? "Computer can't move" : "Player can't move", SwingConstants.CENTER);
+         playLabelText[k] = new JLabel(k == 0 ? "Computer" : "Player", 
+            SwingConstants.CENTER);
       }
 
       for (k = 0; k < Controller.NUM_PLAYERS; k++)
@@ -540,12 +561,13 @@ class CardTableView extends JFrame
    }
 
    /*
-    * This method receives an integer index and Card object. It sets the indexed
-    * played card label with the provided Card's icon
+    * This method receives an integer index and Card object. It sets the 
+    * indexed played card label with the provided Card's icon.
     */
-   public void setPlayedCard(int index, Card computerCard)
+   public void setPlayedCard(int index, Card playedCard)
    {
-      CardTableView.playedCardLabels[index].setIcon(GUICard.getIcon(computerCard));
+      CardTableView.playedCardLabels[index].setIcon(GUICard.
+         getIcon(playedCard));
    }
 
    /*
@@ -577,8 +599,10 @@ class CardTableView extends JFrame
     */
    public void resetPlayedCardLabels()
    {
-      CardTableView.playedCardLabels[0].setIcon(GUICard.getIcon(gameController.getCardFromDeckAndPutInPlayArea(0)));
-      CardTableView.playedCardLabels[1].setIcon(GUICard.getIcon(gameController.getCardFromDeckAndPutInPlayArea(1)));
+      CardTableView.playedCardLabels[0].setIcon(GUICard.getIcon(
+         gameController.getCardFromDeckAndPutInPlayArea(0)));
+      CardTableView.playedCardLabels[1].setIcon(GUICard.getIcon(
+         gameController.getCardFromDeckAndPutInPlayArea(1)));
    }
 
    /*
@@ -588,7 +612,8 @@ class CardTableView extends JFrame
    {
       for (int i = 0; i < Controller.NUM_PLAYERS; i++)
       {
-         CardTableView.playerScoresLabels[i].setText(Integer.toString(Controller.playerScores[i]));
+         CardTableView.playerScoresLabels[i].setText(Integer.toString(
+            Controller.playerScores[i]));
       }
    }
 
@@ -599,14 +624,15 @@ class CardTableView extends JFrame
    {
       for (int i = 0; i < Controller.NUM_PLAYERS; i++)
       {
-         CardTableView.playerScoresLabels[i].setFont(new Font("Arial", Font.PLAIN, 14));
-         ;
+         CardTableView.playerScoresLabels[i].setFont(new Font(
+            "Arial", Font.PLAIN, 14));
       }
    }
 
    /*
-    * redraw human hand every time 2 cards played to show how many cards left in a
-    * hand, or after a round ended to show again full hand of cards
+    * redraw human hand every time 2 cards played to show how many 
+    * cards left in a hand, or after a round ended to show again full 
+    * hand of cards
     */
    public void redrawPlayerHand()
    {
@@ -616,8 +642,10 @@ class CardTableView extends JFrame
       {
          if (k < numCards)
          {
-            CardTableView.humanLabels[k].setIcon(GUICard.getIcon(hand.inspectCard(k)));
-         } else
+            CardTableView.humanLabels[k].setIcon(GUICard.getIcon(
+               hand.inspectCard(k)));
+         } 
+         else
          {
             CardTableView.humanLabels[k].setIcon(GUICard.getBackCardIcon());
          }
@@ -625,21 +653,26 @@ class CardTableView extends JFrame
    }
 
    /*
-    * This method reconfigures the GUI to display that the computer player has won.
+    * This method reconfigures the GUI to display that the computer 
+    * player has won.
     */
    public void displayComputerWin()
    {
-      CardTableView.playerScoresLabels[0].setFont(new Font("Serif", Font.BOLD, 18));
-      CardTableView.playerScoresLabels[0].setText("Computer won a game");
+      CardTableView.playerScoresLabels[0].setFont(new Font(
+         "Serif", Font.BOLD, 18));
+      CardTableView.playerScoresLabels[0].setText(
+         "Computer won a game");
       CardTableView.playerScoresLabels[1].setText("");
    }
 
    /*
-    * This method reconfigures the GUI to display that the human player has won.
+    * This method reconfigures the GUI to display that the human 
+    * player has won.
     */
    public void displayPlayerWin()
    {
-      CardTableView.playerScoresLabels[1].setFont(new Font("Serif", Font.BOLD, 18));
+      CardTableView.playerScoresLabels[1].setFont(new Font(
+         "Serif", Font.BOLD, 18));
       CardTableView.playerScoresLabels[1].setText("You won a game");
       CardTableView.playerScoresLabels[0].setText("");
    }
@@ -649,15 +682,18 @@ class CardTableView extends JFrame
     */
    public void displayTieGame()
    {
-      CardTableView.playerScoresLabels[0].setFont(new Font("Serif", Font.BOLD, 18));
-      CardTableView.playerScoresLabels[1].setFont(new Font("Serif", Font.BOLD, 18));
+      CardTableView.playerScoresLabels[0].setFont(new Font(
+         "Serif", Font.BOLD, 18));
+      CardTableView.playerScoresLabels[1].setFont(new Font(
+         "Serif", Font.BOLD, 18));
       CardTableView.playerScoresLabels[0].setText("Tie");
       CardTableView.playerScoresLabels[1].setText("Game");
    }
 }
 
 /*
- * One object of class Controller controls the GUI and Model for the card game.
+ * One object of class Controller controls the GUI and Model for 
+ * the card game.
  */
 class Controller
 {
@@ -687,54 +723,71 @@ class Controller
       this.numUnusedCardsPerPack = 0;
       this.unusedCardsPerPack = null;
 
-      this.buildGame = new CardGameFramework(numPacksPerDeck, numJokersPerPack, numUnusedCardsPerPack,
-            unusedCardsPerPack, NUM_PLAYERS, NUM_CARDS_PER_HAND);
+      this.buildGame = new CardGameFramework(numPacksPerDeck, 
+         numJokersPerPack, numUnusedCardsPerPack, unusedCardsPerPack, 
+         NUM_PLAYERS, NUM_CARDS_PER_HAND);
       this.buildGame.deal();
 
       this.gameModel = new Model(this);
-      this.gameView = new CardTableView(this, "CardTable", NUM_CARDS_PER_HAND, NUM_PLAYERS);
+      this.gameView = new CardTableView(this, "CardTable", 
+         NUM_CARDS_PER_HAND, NUM_PLAYERS);
 
       // add mouse listener
       for (int k = 0; k < Controller.NUM_CARDS_PER_HAND; k++)
       {
          gameView.pn1HumanHand.add(CardTableView.humanLabels[k]);
-         HandCardMouseListener listener = new HandCardMouseListener(k, this.buildGame, this.gameModel);
+         HandCardMouseListener listener = new HandCardMouseListener(k, 
+            this.buildGame, this.gameModel);
          CardTableView.humanLabels[k].addMouseListener(listener);
       }
 
       // add button listener
-      this.gameView.getExitButton().addActionListener(new GameButtonListener(this));
-      this.gameView.getnewGameButton().addActionListener(new GameButtonListener(this));
-      this.gameView.getCannotPlayButton().addActionListener(new GameButtonListener(this));
-      this.gameView.getStartStopButton().addActionListener(new StartStopListener(this, this.gameModel));
+      this.gameView.getExitButton().addActionListener(
+         new GameButtonListener(this));
+      this.gameView.getnewGameButton().addActionListener(
+         new GameButtonListener(this));
+      this.gameView.getCannotPlayButton().addActionListener(
+         new GameButtonListener(this));
+      this.gameView.getStartStopButton().addActionListener(
+         new StartStopListener(this, this.gameModel));
 
       this.gameModel.getTimer().startTimer(); // Starts measuring the time.
    }
 
    /*
-    * This method receives an integer index and new score, and then sets that item
-    * in player score to the new given score.
+    * This method receives an integer index and new score, and then 
+    * sets that item in player score to the new given score.
     */
-   public static void setPlayerScore(int index, int newScore)
+   public static boolean setPlayerScore(int index, int newScore)
    {
       if (index >= 0 && index <= NUM_PLAYERS)
       {
          Controller.playerScores[index] = newScore;
-      } else
+         return true;
+      } 
+      else
+      {
          System.out.println("Error setting player score");
+         return false;
+      }
    }
 
    /*
-    * This method receives an integer index and new score, and then sets that item
-    * in total score to the new given score.
+    * This method receives an integer index and new score, and then 
+    * sets that item in total score to the new given score.
     */
-   public static void setTotalScore(int index, int newScore)
+   public static boolean setTotalScore(int index, int newScore)
    {
       if (index >= 0 && index <= NUM_PLAYERS)
       {
          Controller.playerScores[index] = newScore;
-      } else
+         return true;
+      } 
+      else
+      {
          System.out.println("Error setting player score");
+         return false;
+      }
    }
 
    /*
@@ -758,7 +811,8 @@ class Controller
    }
 
    /*
-    * This method takes a Card from the Deck and puts it in the main play area.
+    * This method takes a Card from the Deck and puts it in 
+    * the main play area.
     */
    public Card getCardFromDeckAndPutInPlayArea(int index)
    {
@@ -772,9 +826,8 @@ class Controller
    }
 
    /*
-    * This method instructs the Controller object to redraw the player hand in the
-    * CardTableView.
-    *
+    * This method instructs the Controller object to redraw the 
+    * player hand in the CardTableView.
     */
    public void requestPlayerHandRedraw()
    {
@@ -795,8 +848,8 @@ class Controller
    }
 
    /*
-    * This method receives an integer index and increments that playerScore item in
-    * the array.
+    * This method receives an integer index and increments that 
+    * playerScore item in the array.
     */
    public boolean incrementPlayerScore(int index)
    {
@@ -805,7 +858,8 @@ class Controller
          Controller.playerScores[index]++;
          requestScoreRedraw();
          return true;
-      } else
+      } 
+      else
          return false;
    }
 
@@ -826,8 +880,8 @@ class Controller
    }
 
    /*
-    * This method instructs the Controller to have the CardTableView redraw the
-    * scores.
+    * This method instructs the Controller to have the 
+    * CardTableView redraw the scores.
     */
    public void requestScoreRedraw()
    {
@@ -835,8 +889,8 @@ class Controller
    }
 
    /*
-    * This method requests that the Controller resets the playedCardLabels to the
-    * back card icons in the CardTableView.
+    * This method requests that the Controller resets the playedCardLabels 
+    * to the back card icons in the CardTableView.
     */
    public void requestResetPlayedCards()
    {
@@ -845,7 +899,8 @@ class Controller
    }
 
    /*
-    * This method instructs the game Model to reset the player and total scores.
+    * This method instructs the game Model to reset the player 
+    * and total scores.
     */
    public void requestResetScores()
    {
@@ -861,8 +916,8 @@ class Controller
    }
 
    /*
-    * This method requests that the Controller resets the playedCardLabels to the
-    * back card icons in the CardTableView.
+    * This method requests that the Controller resets the playedCardLabels
+    * to the back card icons in the CardTableView.
     */
    public void requestSetPlayedCard(int index, Card card)
    {
@@ -880,7 +935,8 @@ class Controller
    }
 
    /*
-    * This method returns the CardGameFramework stored in the this Controller.
+    * This method returns the CardGameFramework stored in the 
+    * this Controller.
     */
    public CardGameFramework getGame()
    {
@@ -888,8 +944,8 @@ class Controller
    }
 
    /*
-    * This method handles all the controller activity for when the computer player
-    * wins a game.
+    * This method handles all the controller activity for when the 
+    * computer player wins a game.
     */
    public void computerWinsGame()
    {
@@ -897,8 +953,8 @@ class Controller
    }
 
    /*
-    * This method handles all the controller activity for when the human player
-    * wins a game.
+    * This method handles all the controller activity for when the human 
+    * player wins a game.
     */
    public void playerWinsGame()
    {
@@ -906,7 +962,8 @@ class Controller
    }
 
    /*
-    * This method handles all the controller activity for when the game is a tie.
+    * This method handles all the controller activity for when the 
+    * game is a tie.
     */
    public void tieGame()
    {
@@ -951,8 +1008,8 @@ class Controller
    }
 
    /*
-    * One object of class DelayedComputerMove represents a computer move in the
-    * card game.
+    * One object of class DelayedComputerMove represents a computer move 
+    * in the card game.
     */
    static class DelayedComputerMove implements ActionListener
    {
@@ -978,8 +1035,8 @@ class Controller
    }
 
    /*
-    * A mouse listener for each card on a players hand. Contains index of the card
-    * and a reference to CardGameFramework.
+    * A mouse listener for each card on a players hand. Contains index of 
+    * the card and a reference to CardGameFramework.
     */
    static class HandCardMouseListener implements MouseListener
    {
@@ -990,7 +1047,8 @@ class Controller
       /*
        * Constructor method for class HandCardMouseListener
        */
-      public HandCardMouseListener(int cardIndex, CardGameFramework game, Model gameModel)
+      public HandCardMouseListener(int cardIndex, CardGameFramework game, 
+         Model gameModel)
       {
          this.cardIndex = cardIndex;
          this.gameModel = gameModel;
@@ -1039,8 +1097,8 @@ class Controller
    }
 
    /*
-    * One object of class GameButtonListener represents a button listener for the
-    * CardTableView.
+    * One object of class GameButtonListener represents a button listener 
+    * for the CardTableView.
     */
    class GameButtonListener implements ActionListener
    {
@@ -1057,8 +1115,8 @@ class Controller
       }
 
       /*
-       * This method is the ActionListener for class CardTable. It contains the logic
-       * for when the exitButton and newGameButton are pressed.
+       * This method is the ActionListener for class CardTable. It contains 
+       * the logic for when the exitButton and newGameButton are pressed.
        */
       @Override
       public void actionPerformed(ActionEvent e)
@@ -1110,7 +1168,8 @@ class GUICard
    public static Icon getIcon(Card card)
    {
       GUICard.loadCardIcons();
-      return iconCards[turnCardValueIntoInt(card)][turnCardSuitIntoInt(card)];
+      return iconCards[turnCardValueIntoInt(card)]
+         [turnCardSuitIntoInt(card)];
    }
 
    /*
@@ -1123,8 +1182,8 @@ class GUICard
    }
 
    /*
-    * This method receives an integer and converts it to a string that represents
-    * the value of a Card.
+    * This method receives an integer and converts it to a string that 
+    * represents the value of a Card.
     */
    static String turnIntIntoCardValue(int k)
    {
@@ -1184,8 +1243,8 @@ class GUICard
    }
 
    /*
-    * This method receives an integer and converts it to the appropriate Suit value
-    * for a Card.
+    * This method receives an integer and converts it to the appropriate 
+    * Suit value for a Card.
     */
    static String turnIntIntoCardSuit(int j)
    {
@@ -1275,8 +1334,8 @@ class GUICard
    }
 
    /*
-    * This method receives a Card object and returns an integer representing the
-    * Card's Suit.
+    * This method receives a Card object and returns an integer 
+    * representing the Card's Suit.
     */
    static int turnCardSuitIntoInt(Card card)
    {
@@ -1324,8 +1383,8 @@ class GUICard
    }
 
    /*
-    * This method loads the Card Object images if they have not been done so
-    * already.
+    * This method loads the Card Object images if they have not been done 
+    * so already.
     */
    static void loadCardIcons()
    {
@@ -1344,7 +1403,8 @@ class GUICard
       {
          for (int j = 0; j < iconCards[0].length; j++)
          {
-            iconCards[i][j] = new ImageIcon(folder + turnIntIntoCardValue(i) + turnIntIntoCardSuit(j) + exten);
+            iconCards[i][j] = new ImageIcon(folder + turnIntIntoCardValue(i) 
+               + turnIntIntoCardSuit(j) + exten);
          }
       }
 
@@ -1354,8 +1414,8 @@ class GUICard
 }
 
 /*
- * One object of class Card represents a playing card complete with a value and
- * suit.
+ * One object of class Card represents a playing card complete with a value 
+ * and suit.
  */
 class Card
 {
@@ -1368,8 +1428,8 @@ class Card
    private boolean errorFlag = false;
 
    /*
-    * Constructor method for class Card. This method receives a value and suit and
-    * creates a Card object with those attributes.
+    * Constructor method for class Card. This method receives a value and 
+    * suit and creates a Card object with those attributes.
     */
    public Card(char value, Suit suit)
    {
@@ -1377,8 +1437,8 @@ class Card
    }
 
    /*
-    * Default constructor for class Card. Creates a Card that represents the ace of
-    * spades.
+    * Default constructor for class Card. Creates a Card that represents 
+    * the ace of spades.
     */
    public Card()
    {
@@ -1386,8 +1446,8 @@ class Card
    }
 
    /*
-    * Copy Constructor for class Card. This method receives a Card object, and
-    * generates another one containing identical data.
+    * Copy Constructor for class Card. This method receives a Card object, 
+    * and generates another one containing identical data.
     */
    public Card(Card card)
    {
@@ -1399,6 +1459,10 @@ class Card
       this.suit = card.suit;
    }
 
+   /*
+    * This method receives an array of Card objects and its size. It then
+    * sorts the array based on the value and suit of the Cards.
+    */
    static void arraySort(Card[] cards, int arraySize)
    {
       boolean swapped = true;
@@ -1428,12 +1492,14 @@ class Card
       if (errorFlag)
       {
          return "**invalid**";
-      } else
+      } 
+      else
          return getValue() + " of " + getSuit();
    }
 
    /*
-    * Mutator method that sets the numerical value and suit for the Card object.
+    * Mutator method that sets the numerical value and suit for 
+    * the Card object.
     */
    public boolean set(char value, Suit suit)
    {
@@ -1442,7 +1508,8 @@ class Card
          this.value = Character.toUpperCase(value);
          this.suit = suit;
          this.errorFlag = false;
-      } else
+      } 
+      else
       {
          this.errorFlag = true;
       }
@@ -1482,8 +1549,8 @@ class Card
    }
 
    /*
-    * This method receives both a char and Suit. The method then determines if they
-    * are appropriate for Card creation and returns a boolean.
+    * This method receives both a char and Suit. The method then determines 
+    * if they are appropriate for Card creation and returns a boolean.
     */
    private boolean isValid(char value, Suit suit)
    {
@@ -1499,8 +1566,8 @@ class Card
    }
 
    /*
-    * This method receives a Card object and determines if it is equal in value to
-    * the current Card.
+    * This method receives a Card object and determines if it is equal in 
+    * value to the current Card.
     */
    public boolean equals(Card card)
    {
@@ -1508,24 +1575,31 @@ class Card
       {
          return false;
       }
-      return (this.value == card.value && this.suit == card.suit && this.errorFlag == card.errorFlag);
+      return (this.value == card.value && this.suit == card.suit && 
+         this.errorFlag == card.errorFlag);
    }
 
    /*
-    * This method receives a Card object and compares the Suit and Value to the
-    * receiving Card to determine which is of greater value. Will be used in game.
+    * This method receives a Card object and compares the Suit and Value 
+    * to the receiving Card to determine which is of greater value. 
+    * Will be used in game.
     */
    public int compareTo(Card card)
    {
 
       if (this.value == card.value)
       {
-         return GUICard.turnCardSuitIntoInt(this) - GUICard.turnCardSuitIntoInt(card);
+         return GUICard.turnCardSuitIntoInt(this) - 
+            GUICard.turnCardSuitIntoInt(card);
       }
 
-      return GUICard.turnCardValueIntoInt(this) - GUICard.turnCardValueIntoInt(card);
+      return GUICard.turnCardValueIntoInt(this) - 
+         GUICard.turnCardValueIntoInt(card);
    }
 
+   /*
+    * This enumeration contains the four values a Card Suit can be.
+    */
    public enum Suit
    {
       CLUBS, DIAMONDS, HEARTS, SPADES
@@ -1533,8 +1607,8 @@ class Card
 }
 
 /*
- * One object of class Hand represents a hand in a card game. It is composed of
- * Card objects.
+ * One object of class Hand represents a hand in a card game. It is 
+ * composed of Card objects.
  */
 class Hand
 {
@@ -1621,8 +1695,9 @@ class Hand
    }
 
    /*
-    * This method receives an integer value and locates the associated Card in the
-    * Hand. If the Card is not located, a new Card is generated and returned.
+    * This method receives an integer value and locates the associated 
+    * Card in the Hand. If the Card is not located, a new Card is generated 
+    * and returned.
     */
 
    public Card inspectCard(int k)
@@ -1637,8 +1712,8 @@ class Hand
    }
 
    /*
-    * This method receives a index value and returns the appropriate Card from the
-    * Hand.
+    * This method receives a index value and returns the appropriate 
+    * Card from the Hand.
     */
    public Card playCard(int cardIndex)
    {
@@ -1681,8 +1756,8 @@ class Deck
    private int topCard;
 
    /*
-    * Constructor method for Class Deck. This method receives an integer numPacks
-    * and generates a deck with numPacks number of card packs.
+    * Constructor method for Class Deck. This method receives an integer 
+    * numPacks and generates a deck with numPacks number of card packs.
     */
    public Deck(int numPacks)
    {
@@ -1691,8 +1766,8 @@ class Deck
    }
 
    /*
-    * Default Constructor method for Class Deck. This method creates a Deck with
-    * one pack of Card objects.
+    * Default Constructor method for Class Deck. This method creates a 
+    * Deck with one pack of Card objects.
     */
    public Deck()
    {
@@ -1700,8 +1775,8 @@ class Deck
    }
 
    /*
-    * This method generates the master pack for a deck of Card objects. Updated to
-    * include Joker.
+    * This method generates the master pack for a deck of Card objects. 
+    * Updated to include Joker.
     */
    private static void allocateMasterPack()
    {
@@ -1791,7 +1866,8 @@ class Deck
    }
 
    /*
-    * This method returns the value for the requested Card object in the Deck.
+    * This method returns the value for the requested Card object 
+    * in the Deck.
     */
    public Card inspectCard(int k)
    {
@@ -1818,7 +1894,8 @@ class Deck
    }
 
    /*
-    * This method receives a Card and removes the matching Card from the Deck.
+    * This method receives a Card and removes the matching Card 
+    * from the Deck.
     */
    public boolean removeCard(Card card)
    {
@@ -1844,7 +1921,8 @@ class Deck
    }
 
    /*
-    * This method returns an integer containing the number of Cards in the Deck.
+    * This method returns an integer containing the number of 
+    * Cards in the Deck.
     */
    public int getNumCards()
    {
@@ -1852,8 +1930,8 @@ class Deck
    }
 
    /*
-    * This method adds a Card object to the Deck. A boolean is returned describing
-    * the status of completion.
+    * This method adds a Card object to the Deck. A boolean is returned 
+    * describing the status of completion.
     */
    public boolean addCard(Card card)
    {
@@ -1909,8 +1987,9 @@ class CardGameFramework
    // in the game. e.g. pinochle does not
    // use cards 2-8 of any suit
 
-   public CardGameFramework(int numPacks, int numJokersPerPack, int numUnusedCardsPerPack, Card[] unusedCardsPerPack,
-         int numPlayers, int numCardsPerHand)
+   public CardGameFramework(int numPacks, int numJokersPerPack, 
+      int numUnusedCardsPerPack, Card[] unusedCardsPerPack, int numPlayers, 
+      int numCardsPerHand)
    {
       int k;
 
@@ -1924,8 +2003,10 @@ class CardGameFramework
       if (numPlayers < 1 || numPlayers > MAX_PLAYERS)
          numPlayers = 4;
       // one of many ways to assure at least one full deal to all players
-      if (numCardsPerHand < 1 || numCardsPerHand > numPacks * (52 - numUnusedCardsPerPack) / numPlayers)
-         numCardsPerHand = numPacks * (52 - numUnusedCardsPerPack) / numPlayers;
+      if (numCardsPerHand < 1 || numCardsPerHand > numPacks * 
+         (52 - numUnusedCardsPerPack) / numPlayers)
+         numCardsPerHand = numPacks * (52 - numUnusedCardsPerPack) 
+            / numPlayers;
 
       // allocate
       this.unusedCardsPerPack = new Card[numUnusedCardsPerPack];
@@ -2035,7 +2116,8 @@ class CardGameFramework
    Card playCard(int playerIndex, int cardIndex)
    {
       // returns bad card if either argument is bad
-      if (playerIndex < 0 || playerIndex > numPlayers - 1 || cardIndex < 0 || cardIndex > numCardsPerHand - 1)
+      if (playerIndex < 0 || playerIndex > numPlayers - 1 || cardIndex < 0 || 
+         cardIndex > numCardsPerHand - 1)
       {
          // Creates a card that does not work
          return new Card('Z', Card.Suit.SPADES);
