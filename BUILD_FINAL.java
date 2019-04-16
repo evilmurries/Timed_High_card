@@ -385,7 +385,7 @@ class CardTableView extends JFrame {
         // initial state for the game
         for (k = 0; k < Controller.NUM_PLAYERS; k++) {
             playerScoresLabels[k] = new JLabel("0", SwingConstants.CENTER);
-            playLabelText[k] = new JLabel(k == 0 ? "Computer" : "You", SwingConstants.CENTER);
+            playLabelText[k] = new JLabel(k == 0 ? "Computer can't move" : "Player can't move", SwingConstants.CENTER);
         }
 
         for (k = 0; k < Controller.NUM_PLAYERS; k++) {
