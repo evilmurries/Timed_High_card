@@ -129,7 +129,7 @@ class Timers extends Thread
       continueTicks = false;
    }
 
-   /** Resets timer. */
+   /* Resets timer. */
    public void resetTimer()
    {
       totalElapsedTimeInSeconds = 0L;
